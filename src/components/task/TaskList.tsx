@@ -1,6 +1,7 @@
 "use client";
 
-import { Task, TaskStatus, useDashboardStore } from "@/store/dashboardStore";
+import { useDashboardStore } from "@/store/dashboardStore";
+import { Task } from "@/types/Task";
 import { TaskCard } from "./TaskCard";
 import { TaskFilter } from "./TaskFilter";
 import {
@@ -31,13 +32,12 @@ export function TaskList() {
 
   const filteredTasks = tasks.filter(task => {
     if (taskFilter === 'all') return true;
-    return task.status === taskFilter;
+    return ;
   });
   
   const handleToggleComplete = (task: Task) => {
     updateTask(task.id, { 
       done: !task.done,
-      status: !task.done ? 'closed' : 'open'
     });
   };
 

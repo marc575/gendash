@@ -1,5 +1,5 @@
 export type TaskPriority = 'High' | 'Medium' | 'Low';
-export type TaskStatus = 'pending' | 'in-progress' | 'completed' | 'cancelled';
+export type TaskStatus = 'pending' | 'in-progress' | 'completed' | 'cancelled' | 'archived' | 'open' | 'closed';
 
 export interface User {
   id: string;
@@ -30,7 +30,7 @@ export interface TaskActivity {
 export interface Task {
   id: string;
   title: string;
-  description?: string;
+  description: string;
   project: string;
   status: TaskStatus;
   priority: TaskPriority;
@@ -52,6 +52,7 @@ export interface Task {
   dependencies?: string[]; // IDs des tâches dont celle-ci dépend
   blockedBy?: string[]; // IDs des tâches qui bloquent celle-ci
   comments?: Comment[];
+  done?: boolean;
   attachments?: {
     id: string;
     name: string;

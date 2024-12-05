@@ -1,17 +1,16 @@
 "use client";
 
 import { Card } from "@/components/ui/Card";
-import { Avatar } from "@/components/ui/Avatar";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/DropdownMenu";
 import { useDashboardStore } from "@/store/dashboardStore";
 import { motion } from "framer-motion";
 import { TaskList } from "@/components/task/TaskList";
-import { TaskGrid } from "@/components/task/TaskGrid"; // Import TaskGrid
-import { ChevronDown, Calendar, Bell, BarChart2, Clock, CheckCircle2, Plus, Activity, Filter, LayersIcon, MessageSquare, LayoutGrid, List } from "lucide-react"; // Import LayoutGrid et List
+import { TaskGrid } from "@/components/task/TaskGrid";
+import { Calendar, BarChart2, Clock, CheckCircle2, Plus, Activity, Filter, LayersIcon, MessageSquare, LayoutGrid, List } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
 
 export default function Home() {
-  const { activities, activityFilter, setActivityFilter, viewMode, setViewMode } = useDashboardStore(); // Ajouter viewMode et setViewMode
+  const { activities, activityFilter, setActivityFilter, viewMode, setViewMode } = useDashboardStore(); 
   const today = new Date();
   const dateOptions: Intl.DateTimeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
   const formattedDate = today.toLocaleDateString('fr-FR', dateOptions);
@@ -103,7 +102,7 @@ export default function Home() {
                   <div>
                     <Card.Title>Citation du jour</Card.Title>
                     <Card.Description className="text-lg mt-2 italic">
-                      "La productivité n'est pas un accident. C'est toujours le résultat d'un engagement envers l'excellence, une planification intelligente et un effort ciblé."
+                      &quot;La productivité n&apos;est pas un accident. C&apos;est toujours le résultat d&apos;un engagement envers l&apos;excellence, une planification intelligente et un effort ciblé.&quot;
                     </Card.Description>
                   </div>
                 </div>

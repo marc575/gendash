@@ -16,7 +16,7 @@ export function formatDate(date: string | Date | undefined | null) {
       month: 'long',
       day: 'numeric',
     });
-  } catch (error) {
+  } catch {
     return '';
   }
 }
@@ -31,7 +31,7 @@ export function formatTime(date: string | Date | undefined | null) {
       hour: '2-digit',
       minute: '2-digit',
     });
-  } catch (error) {
+  } catch {
     return '';
   }
 }
@@ -46,7 +46,7 @@ export function formatRelativeTime(date: string | Date | undefined | null) {
     const diffInSeconds = Math.floor((now.getTime() - d.getTime()) / 1000);
     
     if (diffInSeconds < 60) {
-      return 'À l\'instant';
+      return 'À l&apos;instant';
     } else if (diffInSeconds < 3600) {
       const minutes = Math.floor(diffInSeconds / 60);
       return `Il y a ${minutes} minute${minutes > 1 ? 's' : ''}`;
@@ -56,7 +56,7 @@ export function formatRelativeTime(date: string | Date | undefined | null) {
     } else {
       return formatDate(d);
     }
-  } catch (error) {
+  } catch {
     return '';
   }
 }

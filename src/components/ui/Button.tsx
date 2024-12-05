@@ -3,7 +3,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost';
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive' | 'outline';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -28,6 +28,7 @@ export const Button: React.FC<ButtonProps> = ({
     variant === 'primary' && 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm',
     variant === 'secondary' && 'bg-blue-100 text-blue-700 hover:bg-blue-200',
     variant === 'ghost' && 'bg-transparent text-blue-600 hover:bg-blue-50',
+    variant === 'destructive' && 'bg-red-600 text-white hover:bg-red-700 shadow-sm',
     
     // Sizes
     size === 'sm' && 'px-2 py-1 text-xs',

@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Switch } from '@/components/ui/Switch';
-import { Bell, Moon, Sun, User, Palette, Clock, Globe } from 'lucide-react';
+import { Bell, Palette, Clock, Globe } from 'lucide-react';
 import { useSettingsStore } from '@/store/settingsStore';
 
 export default function Settings() {
@@ -24,7 +24,7 @@ export default function Settings() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-medium">Mode sombre</p>
-                <p className="text-sm text-gray-500">Activer le mode sombre pour l'interface</p>
+                <p className="text-sm text-gray-500">Activer le mode sombre pour l&apos;interface</p>
               </div>
               <Switch
                 checked={settings.darkMode}

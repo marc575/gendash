@@ -1,6 +1,6 @@
 "use client";
 
-import { Task } from '@/store/dashboardStore';
+import { Task } from '@/types/Task';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -84,7 +84,6 @@ export function TaskCard({ task, onEdit, onDelete, onToggleComplete }: TaskCardP
             </Badge>
             <Button
               variant="ghost"
-              size="icon"
               className="h-8 w-8 text-muted-foreground/60 hover:text-muted-foreground"
               onClick={() => onEdit(task)}
             >
@@ -92,7 +91,6 @@ export function TaskCard({ task, onEdit, onDelete, onToggleComplete }: TaskCardP
             </Button>
             <Button
               variant="ghost"
-              size="icon"
               className="h-8 w-8 text-muted-foreground/60 hover:text-red-500"
               onClick={() => onDelete(task)}
             >
@@ -120,9 +118,9 @@ export function TaskCard({ task, onEdit, onDelete, onToggleComplete }: TaskCardP
           <div className="flex items-center justify-between pt-2">
             <div className="flex items-center space-x-2 text-sm text-muted-foreground">
               <Clock className="w-4 h-4" />
-              <span>{formatTime(task.time)}</span>
+              <span>{formatTime(task.startTime)}</span>
               <Calendar className="w-4 h-4 ml-2" />
-              <span>{formatDate(task.time)}</span>
+              <span>{formatDate(task.endTime)}</span>
             </div>
 
             <div className="flex -space-x-2">

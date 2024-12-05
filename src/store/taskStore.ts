@@ -1,10 +1,29 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Task, TaskFilter, TaskSort, TaskStats, TaskActivity, User, TaskStatus, TaskPriority } from '@/types/Task';
-import { sampleTasks } from '@/data/sampleTasks';
+import { Task, TaskStatus, TaskPriority, User } from '@/types/Task';
 
-const calculateStats = (tasks: Task[]): TaskStats => {
-  const stats: TaskStats = {
+// Event emitter pour la communication entre stores
+const createEventEmitter = () => {
+  const listeners: { [key: string]: Function[] } = {};
+  return {
+    emit: (event: string, data: any) => {
+      if (listeners[event]) {
+        listeners[event].forEach(listener => listener(data));
+      }
+    },
+    on: (event: string, callback: Function) => {
+      if (!listeners[event]) {
+        listeners[event] = [];
+      }
+      listeners[event].push(callback);
+    }
+  };
+};
+
+export const taskEvents = createEventEmitter();
+
+const calculateStats = (tasks: Task[]) => {
+  const stats = {
     total: tasks.length,
     completed: 0,
     inProgress: 0,
@@ -13,55 +32,56 @@ const calculateStats = (tasks: Task[]): TaskStats => {
     byPriority: {
       High: 0,
       Medium: 0,
-      Low: 0,
+      Low: 0
     },
+    byLabel: {} as Record<string, number>,
+    byAssignee: {} as Record<string, number>,
     byStatus: {
-      Open: 0,
-      'In Progress': 0,
-      Closed: 0,
-      Archived: 0,
+      open: 0,
+      closed: 0,
+      completed: 0,
+      archived: 0,
     },
-    byLabel: {
-      Bug: 0,
-      Feature: 0,
-      Documentation: 0,
-      Design: 0,
-      Testing: 0,
-    },
-    byAssignee: {},
   };
 
   tasks.forEach(task => {
     // Count by status
     switch (task.status) {
-      case 'Closed':
+      case 'completed':
         stats.completed++;
+        stats.byStatus.completed++;
         break;
-      case 'In Progress':
+      case 'open':
         stats.inProgress++;
+        stats.byStatus.open++;
         break;
-      case 'Open':
-        stats.pending++;
-        break;
-      case 'Archived':
+      case 'closed':
         stats.cancelled++;
+        stats.byStatus.closed++;
+        break;
+      case 'archived':
+        stats.cancelled++;
+        stats.byStatus.archived++;
+        break;
+      default:
+        stats.pending++;
         break;
     }
 
     // Count by priority
-    stats.byPriority[task.priority]++;
-
-    // Count by status
-    stats.byStatus[task.status]++;
+    if (task.priority) {
+      stats.byPriority[task.priority]++;
+    }
 
     // Count by label
-    task.labels?.forEach(label => {
-      stats.byLabel[label]++;
+    task.labels.forEach(label => {
+      stats.byLabel[label] = (stats.byLabel[label] || 0) + 1;
     });
 
     // Count by assignee
     if (task.assignee) {
-      stats.byAssignee[task.assignee.id] = (stats.byAssignee[task.assignee.id] || 0) + 1;
+      const assigneeId = task.assignee.id;
+      stats.byAssignee[assigneeId] = (stats.byAssignee[assigneeId] || 0) + 1;
     }
   });
 
@@ -70,44 +90,48 @@ const calculateStats = (tasks: Task[]): TaskStats => {
 
 interface TaskState {
   tasks: Task[];
-  filter: TaskFilter;
-  sort: TaskSort;
-  stats: TaskStats;
+  filter: any;
+  sort: any;
+  stats: any;
   addTask: (task: Task) => void;
   updateTask: (taskId: string, updates: Partial<Task>) => void;
   deleteTask: (taskId: string) => void;
-  setFilter: (filter: TaskFilter) => void;
-  setSort: (sort: TaskSort) => void;
+  setFilter: (filter: any) => void;
+  setSort: (sort: any) => void;
   addComment: (taskId: string, content: string, user: User) => void;
-  addAttachment: (taskId: string, attachment: Task['attachments'][0]) => void;
+  addAttachment: (taskId: string, attachment: Omit<NonNullable<Task['attachments']>[0], 'id'>) => void;
   assignTask: (taskId: string, userId: string) => void;
   updateTaskStatus: (taskId: string, status: TaskStatus) => void;
   addSubtask: (parentId: string, subtask: Task) => void;
   updateTaskPriority: (taskId: string, priority: TaskPriority) => void;
-  addTaskLabel: (taskId: string, label: Task['labels'][0]) => void;
-  removeTaskLabel: (taskId: string, label: Task['labels'][0]) => void;
+  addTaskLabel: (taskId: string, label: string) => void;
+  removeTaskLabel: (taskId: string, label: string) => void;
   archiveTask: (taskId: string) => void;
-  calculateStats: () => TaskStats;
+  calculateStats: () => any;
   reorderTasks: (newTasks: Task[]) => void;
 }
 
 export const useTaskStore = create<TaskState>()(
   persist(
     (set, get) => ({
-      tasks: sampleTasks,
-      filter: {},
-      sort: { field: 'createdAt', direction: 'desc' },
-      stats: calculateStats(sampleTasks),
+      tasks: [],
+      filter: {
+        status: [],
+        priority: [],
+        labels: [],
+        assignee: [],
+        project: [],
+        isCompleted: false,
+      },
+      sort: {
+        field: 'createdAt',
+        direction: 'desc',
+      },
+      stats: calculateStats([]),
 
       addTask: (task: Task) => {
         set((state) => {
-          const newTasks = [...state.tasks, {
-            ...task,
-            labels: task.labels || [],
-            priority: task.priority || 'Medium',
-            createdAt: new Date(),
-            updatedAt: new Date()
-          }];
+          const newTasks = [...state.tasks, task];
           return {
             tasks: newTasks,
             stats: calculateStats(newTasks),
@@ -118,13 +142,7 @@ export const useTaskStore = create<TaskState>()(
       updateTask: (taskId: string, updates: Partial<Task>) => {
         set((state) => {
           const newTasks = state.tasks.map((task) =>
-            task.id === taskId
-              ? {
-                  ...task,
-                  ...updates,
-                  updatedAt: new Date(),
-                }
-              : task
+            task.id === taskId ? { ...task, ...updates } : task
           );
           return {
             tasks: newTasks,
@@ -143,280 +161,242 @@ export const useTaskStore = create<TaskState>()(
         });
       },
 
-      setFilter: (filter: TaskFilter) => {
+      setFilter: (filter: any) => {
         set({ filter });
       },
 
-      setSort: (sort: TaskSort) => {
+      setSort: (sort: any) => {
         set({ sort });
       },
 
       addComment: (taskId: string, content: string, user: User) => {
-        const comment = {
-          id: Math.random().toString(36).substr(2, 9),
-          content,
-          author: user,
-          createdAt: new Date(),
-        };
-
-        set((state) => ({
-          tasks: state.tasks.map((task) =>
-            task.id === taskId
-              ? {
-                  ...task,
-                  comments: [...(task.comments || []), comment],
-                  activity: [
-                    ...(task.activity || []),
-                    {
-                      id: Math.random().toString(36).substr(2, 9),
-                      type: 'comment',
-                      user,
-                      timestamp: new Date(),
-                      description: 'added a comment',
-                    },
-                  ],
-                }
-              : task
-          ),
-        }));
+        set((state) => {
+          const newTasks = state.tasks.map((task) => {
+            if (task.id === taskId) {
+              const newComment = {
+                id: crypto.randomUUID(),
+                content,
+                author: user,
+                createdAt: new Date(),
+              };
+              return {
+                ...task,
+                comments: [...(task.comments || []), newComment],
+              };
+            }
+            return task;
+          });
+          return {
+            tasks: newTasks,
+            stats: calculateStats(newTasks),
+          };
+        });
       },
 
       addAttachment: (taskId: string, attachment) => {
-        set((state) => ({
-          tasks: state.tasks.map((task) =>
-            task.id === taskId
-              ? {
-                  ...task,
-                  attachments: [...(task.attachments || []), attachment],
-                }
-              : task
-          ),
-        }));
+        set((state) => {
+          const newTasks = state.tasks.map((task) => {
+            if (task.id === taskId) {
+              const newAttachment = {
+                ...attachment,
+                id: crypto.randomUUID(),
+                uploadedAt: new Date(),
+              };
+              taskEvents.emit('activity', {
+                type: 'attachment_added',
+                action: `Attachment ${attachment.name} added`,
+                task: taskId,
+                user: attachment.uploadedBy,
+              });
+              return {
+                ...task,
+                attachments: [...(task.attachments || []), newAttachment],
+                updatedAt: new Date().toISOString(),
+              };
+            }
+            return task;
+          });
+          return {
+            tasks: newTasks,
+            stats: calculateStats(newTasks),
+          };
+        });
       },
 
       assignTask: (taskId: string, userId: string) => {
-        const { tasks } = get();
-        const user = tasks
-          .flatMap((t) => t.participants)
-          .find((p) => p.id === userId);
-
-        if (user) {
-          set((state) => ({
-            tasks: state.tasks.map((task) =>
-              task.id === taskId
-                ? {
-                    ...task,
-                    assignee: user,
-                    activity: [
-                      ...(task.activity || []),
-                      {
-                        id: Math.random().toString(36).substr(2, 9),
-                        type: 'assignment',
-                        user,
-                        timestamp: new Date(),
-                        description: `assigned to ${user.name}`,
-                      },
-                    ],
-                  }
-                : task
-            ),
-          }));
-        }
+        set((state) => {
+          const newTasks = state.tasks.map((task) => {
+            if (task.id === taskId) {
+              const assignee = { id: userId, name: `User ${userId}` };
+              taskEvents.emit('activity', {
+                type: 'assignment',
+                action: `Task assigned to ${assignee.name}`,
+                task: taskId,
+                user: assignee,
+              });
+              return {
+                ...task,
+                assignee,
+                updatedAt: new Date().toISOString(),
+              };
+            }
+            return task;
+          });
+          return {
+            tasks: newTasks,
+            stats: calculateStats(newTasks),
+          };
+        });
       },
 
       updateTaskStatus: (taskId: string, newStatus: TaskStatus) => {
         set((state) => {
-          const task = state.tasks.find((t) => t.id === taskId);
-          if (!task) return state;
-
-          const updatedTasks = state.tasks.map((t) =>
-            t.id === taskId
-              ? {
-                  ...t,
-                  status: newStatus,
-                  completedAt: newStatus === 'Closed' ? new Date() : t.completedAt,
-                  updatedAt: new Date(),
-                  activity: [
-                    ...(t.activity || []),
-                    {
-                      id: Math.random().toString(36).substr(2, 9),
-                      type: 'status_change',
-                      user: t.assignee || t.participants[0],
-                      timestamp: new Date(),
-                      previousValue: t.status,
-                      newValue: newStatus,
-                    },
-                  ],
-                }
-              : t
-          );
-
+          const newTasks = state.tasks.map((task) => {
+            if (task.id === taskId) {
+              taskEvents.emit('activity', {
+                type: 'status_change',
+                action: `Status changed from ${task.status} to ${newStatus}`,
+                task: taskId,
+                previousValue: task.status,
+                newValue: newStatus,
+                user: task.assignee || { id: 'system', name: 'System' },
+              });
+              return {
+                ...task,
+                status: newStatus,
+                completedAt: newStatus === 'completed' ? new Date().toISOString() : task.completedAt,
+                updatedAt: new Date().toISOString(),
+              };
+            }
+            return task;
+          });
           return {
-            tasks: updatedTasks,
-            stats: calculateStats(updatedTasks),
+            tasks: newTasks,
+            stats: calculateStats(newTasks),
           };
         });
       },
 
       addSubtask: (parentId: string, subtask: Task) => {
         set((state) => {
-          const parentTask = state.tasks.find(t => t.id === parentId);
-          if (!parentTask) return state;
-
-          const newSubtask = {
-            ...subtask,
-            parentTask: parentId,
-            createdAt: new Date(),
-            updatedAt: new Date()
-          };
-
-          const updatedTasks = [
-            ...state.tasks.map(task => 
-              task.id === parentId 
-                ? {
-                    ...task,
-                    subtasks: [...(task.subtasks || []), newSubtask.id],
-                    updatedAt: new Date()
-                  }
-                : task
-            ),
-            newSubtask
-          ];
-
+          const newTasks = state.tasks.map((task) => {
+            if (task.id === parentId) {
+              return {
+                ...task,
+                subtasks: [...(task.subtasks || []), subtask.id],
+              };
+            }
+            return task;
+          });
           return {
-            tasks: updatedTasks,
-            stats: calculateStats(updatedTasks)
+            tasks: [...newTasks, subtask],
+            stats: calculateStats([...newTasks, subtask]),
           };
         });
       },
 
       updateTaskPriority: (taskId: string, priority: TaskPriority) => {
         set((state) => {
-          const task = state.tasks.find((t) => t.id === taskId);
-          if (!task) return state;
-
-          const updatedTasks = state.tasks.map((t) =>
-            t.id === taskId
-              ? {
-                  ...t,
-                  priority,
-                  updatedAt: new Date(),
-                  activity: [
-                    ...(t.activity || []),
-                    {
-                      id: Math.random().toString(36).substr(2, 9),
-                      type: 'priority_change',
-                      user: t.assignee || t.participants[0],
-                      timestamp: new Date(),
-                      previousValue: t.priority,
-                      newValue: priority,
-                    },
-                  ],
-                }
-              : t
-          );
-
+          const newTasks = state.tasks.map((task) => {
+            if (task.id === taskId) {
+              taskEvents.emit('activity', {
+                type: 'priority_change',
+                action: `Priority changed from ${task.priority} to ${priority}`,
+                task: taskId,
+                previousValue: task.priority,
+                newValue: priority,
+                user: task.assignee || { id: 'system', name: 'System' },
+              });
+              return {
+                ...task,
+                priority,
+                updatedAt: new Date().toISOString(),
+              };
+            }
+            return task;
+          });
           return {
-            tasks: updatedTasks,
-            stats: calculateStats(updatedTasks)
+            tasks: newTasks,
+            stats: calculateStats(newTasks),
           };
         });
       },
 
-      addTaskLabel: (taskId: string, label) => {
+      addTaskLabel: (taskId: string, label: string) => {
         set((state) => {
-          const task = state.tasks.find(t => t.id === taskId);
-          if (!task) return state;
-
-          const updatedTasks = state.tasks.map((t) =>
-            t.id === taskId && !t.labels?.includes(label)
-              ? {
-                  ...t,
-                  labels: [...(t.labels || []), label],
-                  updatedAt: new Date(),
-                  activity: [
-                    ...(t.activity || []),
-                    {
-                      id: Math.random().toString(36).substr(2, 9),
-                      type: 'label_added',
-                      user: t.assignee || t.participants[0],
-                      timestamp: new Date(),
-                      newValue: label,
-                    },
-                  ],
-                }
-              : t
-          );
-
+          const newTasks = state.tasks.map((task) => {
+            if (task.id === taskId && !task.labels.includes(label)) {
+              taskEvents.emit('activity', {
+                type: 'label_added',
+                action: `Label "${label}" added`,
+                task: taskId,
+                user: task.assignee || { id: 'system', name: 'System' },
+              });
+              return {
+                ...task,
+                labels: [...task.labels, label],
+                updatedAt: new Date().toISOString(),
+              };
+            }
+            return task;
+          });
           return {
-            tasks: updatedTasks,
-            stats: calculateStats(updatedTasks)
+            tasks: newTasks,
+            stats: calculateStats(newTasks),
           };
         });
       },
 
-      removeTaskLabel: (taskId: string, label) => {
+      removeTaskLabel: (taskId: string, label: string) => {
         set((state) => {
-          const task = state.tasks.find(t => t.id === taskId);
-          if (!task) return state;
-
-          const updatedTasks = state.tasks.map((t) =>
-            t.id === taskId
-              ? {
-                  ...t,
-                  labels: (t.labels || []).filter((l) => l !== label),
-                  updatedAt: new Date(),
-                  activity: [
-                    ...(t.activity || []),
-                    {
-                      id: Math.random().toString(36).substr(2, 9),
-                      type: 'label_removed',
-                      user: t.assignee || t.participants[0],
-                      timestamp: new Date(),
-                      previousValue: label,
-                    },
-                  ],
-                }
-              : t
-          );
-
+          const newTasks = state.tasks.map((task) => {
+            if (task.id === taskId) {
+              const updatedLabels = task.labels.filter((l) => l !== label);
+              taskEvents.emit('activity', {
+                type: 'label_removed',
+                action: `Label "${label}" removed`,
+                task: taskId,
+                user: task.assignee || { id: 'system', name: 'System' },
+              });
+              return {
+                ...task,
+                labels: updatedLabels,
+                updatedAt: new Date().toISOString(),
+              };
+            }
+            return task;
+          });
           return {
-            tasks: updatedTasks,
-            stats: calculateStats(updatedTasks)
+            tasks: newTasks,
+            stats: calculateStats(newTasks),
           };
         });
       },
 
       archiveTask: (taskId: string) => {
         set((state) => {
-          const task = state.tasks.find(t => t.id === taskId);
-          if (!task) return state;
-
-          const updatedTasks = state.tasks.map((t) =>
-            t.id === taskId
-              ? {
-                  ...t,
-                  status: 'Archived' as TaskStatus,
-                  updatedAt: new Date(),
-                  archivedAt: new Date(),
-                  activity: [
-                    ...(t.activity || []),
-                    {
-                      id: Math.random().toString(36).substr(2, 9),
-                      type: 'status_change',
-                      user: t.assignee || t.participants[0],
-                      timestamp: new Date(),
-                      previousValue: t.status,
-                      newValue: 'Archived',
-                    },
-                  ],
-                }
-              : t
-          );
-
+          const newTasks = state.tasks.map((task) => {
+            if (task.id === taskId) {
+              const newStatus: TaskStatus = 'archived';
+              taskEvents.emit('activity', {
+                type: 'task_archived',
+                action: 'Task archived',
+                task: taskId,
+                previousValue: task.status,
+                newValue: newStatus,
+                user: task.assignee || { id: 'system', name: 'System' },
+              });
+              return {
+                ...task,
+                status: newStatus,
+                updatedAt: new Date().toISOString(),
+              };
+            }
+            return task;
+          });
           return {
-            tasks: updatedTasks,
-            stats: calculateStats(updatedTasks)
+            tasks: newTasks,
+            stats: calculateStats(newTasks),
           };
         });
       },
@@ -427,10 +407,7 @@ export const useTaskStore = create<TaskState>()(
       },
 
       reorderTasks: (newTasks: Task[]) => {
-        set(() => ({
-          tasks: newTasks,
-          stats: calculateStats(newTasks)
-        }));
+        set({ tasks: newTasks });
       },
     }),
     {

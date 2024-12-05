@@ -35,7 +35,7 @@ const item = {
 };
 
 export default function TasksPage() {
-  const { tasks, deleteTask, reorderTasks } = useTaskStore();
+  const { tasks, deleteTask, reorderTasks, updateTaskStatus } = useTaskStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [sortBy, setSortBy] = useState<SortOption>('date');
@@ -45,7 +45,6 @@ export default function TasksPage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedPriority, setSelectedPriority] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
-  const [showFilters, setShowFilters] = useState(false);
 
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -91,6 +90,11 @@ export default function TasksPage() {
     }
   };
 
+  const handleToggleComplete = (task: Task) => {
+    const newStatus = task.status === 'completed' ? 'pending' : 'completed';
+    updateTaskStatus(task.id, newStatus);
+  };
+
   const filteredAndSortedTasks = useMemo(() => {
     let filtered = tasks;
 
@@ -112,10 +116,12 @@ export default function TasksPage() {
     return filtered.sort((a, b) => {
       switch (sortBy) {
         case 'priority':
-          const priorityOrder = { High: 3, Medium: 2, Low: 1 };
-          return priorityOrder[b.priority] - priorityOrder[a.priority];
+          const priorityOrder = { High: 1, Medium: 2, Low: 3 };
+          return priorityOrder[a.priority] - priorityOrder[b.priority];
         case 'date':
-          return new Date(b.startTime || 0).getTime() - new Date(a.startTime || 0).getTime();
+          const dateA = a.startTime ? new Date(a.startTime).getTime() : 0;
+          const dateB = b.startTime ? new Date(b.startTime).getTime() : 0;
+          return dateB - dateA;
         case 'status':
           return (b.status === 'completed' ? 1 : 0) - (a.status === 'completed' ? 1 : 0);
         default:
@@ -155,7 +161,6 @@ export default function TasksPage() {
         <motion.div variants={item} className="grid gap-4 md:grid-cols-[1fr,auto,auto]">
           <Card className="p-2">
             <Input
-              icon={Search}
               placeholder="Rechercher une tâche..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -261,6 +266,7 @@ export default function TasksPage() {
                       task={task}
                       onEdit={handleEditTask}
                       onDelete={handleDeleteTask}
+                      onToggleComplete={handleToggleComplete}
                     />
                   ))}
                 </motion.div>
@@ -274,6 +280,7 @@ export default function TasksPage() {
                   task={task}
                   onEdit={handleEditTask}
                   onDelete={handleDeleteTask}
+                  onToggleComplete={handleToggleComplete}
                 />
               ))}
             </motion.div>
@@ -287,7 +294,7 @@ export default function TasksPage() {
               <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-4">
                 <FilterIcon className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">Aucune tâche trouvée</h3>
+              <h3 className="text-lg font-semibold mb-2">&quot;Aucune tâche trouvée&quot;</h3>
               <p className="text-muted-foreground mb-4">
                 {searchQuery ? 'Essayez de modifier vos critères de recherche' : 'Commencez par créer une nouvelle tâche'}
               </p>
@@ -309,39 +316,38 @@ export default function TasksPage() {
       <CreateTaskModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
+        task={undefined}
+      />
+
+      <CreateTaskModal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setSelectedTask(null);
+        }}
+        task={selectedTask || undefined}
       />
 
       {selectedTask && (
-        <>
-          <CreateTaskModal
-            isOpen={showEditModal}
-            onClose={() => {
-              setShowEditModal(false);
-              setSelectedTask(null);
-            }}
-            task={selectedTask}
-          />
-
-          <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Supprimer la tâche</DialogTitle>
-              </DialogHeader>
-              <div className="py-4">
-                <p>Êtes-vous sûr de vouloir supprimer la tâche "{selectedTask.title}" ?</p>
-                <p className="text-sm text-muted-foreground mt-2">Cette action est irréversible.</p>
-              </div>
-              <div className="flex justify-end gap-3">
-                <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
-                  Annuler
-                </Button>
-                <Button variant="destructive" onClick={confirmDelete}>
-                  Supprimer
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </>
+        <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Supprimer la tâche</DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              <p>Êtes-vous sûr de vouloir supprimer la tâche &quot;{selectedTask.title}&quot; ?</p>
+              <p className="text-sm text-muted-foreground mt-2">Cette action est irréversible.</p>
+            </div>
+            <div className="flex justify-end gap-3">
+              <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+                Annuler
+              </Button>
+              <Button variant="destructive" onClick={confirmDelete}>
+                Supprimer
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </motion.div>
   );

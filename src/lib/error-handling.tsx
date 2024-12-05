@@ -22,9 +22,7 @@ export const ErrorHandler: React.FC<ErrorProps> = ({
       <h2 className="text-xl font-semibold text-gray-900 mb-2">
         Oops! {message}
       </h2>
-      <p className="text-gray-600 mb-4">
-        Quelque chose s'est mal passé. Veuillez réessayer.
-      </p>
+      <p>Une erreur s&apos;est produite</p>
       {onRetry && (
         <Button 
           variant="primary" 

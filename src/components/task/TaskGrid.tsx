@@ -1,6 +1,7 @@
 "use client";
 
-import { Task, useDashboardStore } from "@/store/dashboardStore";
+import { useDashboardStore } from "@/store/dashboardStore";
+import { Task } from "@/types/Task";
 import {
   DndContext,
   DragEndEvent,
@@ -79,7 +80,7 @@ function TaskCard({ task, onToggle }: TaskCardProps) {
         <Card.Content>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Clock className="h-4 w-4" />
-            <span>{task.time}</span>
+            <span>{task.startTime}</span>
           </div>
         </Card.Content>
       </Card>
@@ -164,7 +165,7 @@ export function TaskGrid() {
               animate={{ opacity: 1 }}
               className="col-span-full text-center py-8"
             >
-              <p className="text-muted-foreground">Aucune tâche pour aujourd'hui</p>
+              <p className="text-muted-foreground">Il n&apos;y a pas encore de tâches dans cette colonne</p>
               <button className="mt-4 text-sm text-primary hover:underline">
                 Ajouter une tâche
               </button>

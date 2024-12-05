@@ -1,6 +1,6 @@
 "use client";
 
-import { Task } from "@/store/dashboardStore";
+import { Task } from "@/types/Task";
 import { Clock, GripVertical, CheckCircle2, Circle } from "lucide-react";
 import { CSS } from "@dnd-kit/utilities";
 import { useSortable } from "@dnd-kit/sortable";
@@ -64,7 +64,7 @@ export function TaskItem({ task, onToggle }: TaskItemProps) {
 
       <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-2 py-1 rounded-md">
         <Clock className="h-3.5 w-3.5" />
-        <span className="hidden sm:inline">{task.time}</span>
+        <span className="hidden sm:inline">{task.startTime}</span>
       </div>
 
       <div className="flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">

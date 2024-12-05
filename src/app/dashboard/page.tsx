@@ -9,10 +9,9 @@ import {
   BarChart3,
   ArrowUp,
   ArrowDown,
-  Users,
-  Tag
+  Tag,
+  Users
 } from 'lucide-react';
-import { TaskList } from '@/components/task/TaskList';
 import { useTaskStore } from '@/store/taskStore';
 import { format, isToday, isThisWeek, isBefore } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -83,16 +82,15 @@ export default function Dashboard() {
   // Statistiques générales
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter(task => task.status === 'completed').length;
-  const urgentTasks = tasks.filter(task => task.priority === 'Urgent').length;
-  const overdueTasks = tasks.filter(task => 
-    task.status !== 'completed' && 
-    task.endTime && 
-    isBefore(new Date(task.endTime), new Date())
-  ).length;
-
+  
   // Tâches par période
-  const todayTasks = tasks.filter(task => isToday(new Date(task.startTime))).length;
-  const weekTasks = tasks.filter(task => isThisWeek(new Date(task.startTime))).length;
+  const todayTasks = tasks.filter(task => 
+    task.startTime && isToday(new Date(task.startTime))
+  ).length;
+  
+  const weekTasks = tasks.filter(task => 
+    task.startTime && isThisWeek(new Date(task.startTime))
+  ).length;
 
   // Tâches par priorité
   const highPriorityTasks = tasks.filter(task => task.priority === 'High').length;
@@ -101,7 +99,13 @@ export default function Dashboard() {
 
   // Tâches assignées
   const assignedTasks = tasks.filter(task => task.assignee).length;
-  const unassignedTasks = totalTasks - assignedTasks;
+
+  // Tâches complétées cette semaine
+  const completedWeekTasks = tasks.filter(task => 
+    task.startTime && 
+    isThisWeek(new Date(task.startTime)) && 
+    task.status === 'completed'
+  ).length;
 
   return (
     <div className="p-6 space-y-6">
@@ -141,8 +145,8 @@ export default function Dashboard() {
         />
         <StatCard
           icon={AlertTriangle}
-          title="Tâches urgentes"
-          value={urgentTasks}
+          title="Tâches à haute priorité"
+          value={highPriorityTasks}
           trend={{ value: 5, isPositive: false }}
           color="text-red-600"
         />
@@ -171,10 +175,7 @@ export default function Dashboard() {
         <TaskProgressCard
           title="Tâches de la semaine"
           total={weekTasks}
-          completed={tasks.filter(task => 
-            isThisWeek(new Date(task.startTime)) && 
-            task.status === 'completed'
-          ).length}
+          completed={completedWeekTasks}
           color="text-green-600"
         />
       </div>

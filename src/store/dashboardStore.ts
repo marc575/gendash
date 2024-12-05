@@ -1,17 +1,21 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { initialTasks, initialActivities } from '@/data/initialData';
+import { Task } from '@/types/Task';
+import { taskEvents } from './taskStore';
 
-export interface Task {
-  id: string;
-  title: string;
-  done: boolean;
-  time: string;
-  priority: 'low' | 'medium' | 'high';
-  status: 'all' | 'open' | 'closed' | 'archived';
-}
-
-export type ActivityType = 'task_completed' | 'task_created' | 'comment_added' | 'task_updated' | 'task_deleted';
+export type ActivityType = 
+  | 'task_completed' 
+  | 'task_created' 
+  | 'comment_added' 
+  | 'task_updated' 
+  | 'task_deleted'
+  | 'status_change'
+  | 'assignment'
+  | 'priority_change'
+  | 'label_added'
+  | 'label_removed'
+  | 'task_archived';
 
 export interface Activity {
   id: string;
@@ -19,6 +23,9 @@ export interface Activity {
   action: string;
   task: string;
   time: string;
+  previousValue?: string;
+  newValue?: string;
+  user?: { id: string; name: string };
 }
 
 export type ViewMode = 'list' | 'grid';
@@ -38,78 +45,79 @@ interface DashboardState {
   setTaskFilter: (filter: TaskStatus) => void;
   setActivityFilter: (filter: ActivityType | 'all') => void;
   setViewMode: (mode: ViewMode) => void;
+  addActivity: (activity: Omit<Activity, 'id' | 'time'>) => void;
 }
 
 export const useDashboardStore = create<DashboardState>()(
   persist(
-    (set) => ({
-      tasks: initialTasks,
-      activities: initialActivities,
-      taskFilter: 'all',
-      activityFilter: 'all',
-      viewMode: 'list',
-      toggleTask: (id) =>
+    (set) => {
+      // Écouter les événements d'activité du taskStore
+      taskEvents.on('activity', (activityData: Omit<Activity, 'id' | 'time'>) => {
         set((state) => ({
-          tasks: state.tasks.map((task) =>
-            task.id === id ? { ...task, done: !task.done } : task
-          ),
           activities: [
             {
-              id: Date.now().toString(),
-              type: 'task_completed',
-              action: 'a marqué comme terminé',
-              task: state.tasks.find((t) => t.id === id)?.title || '',
+              ...activityData,
+              id: crypto.randomUUID(),
               time: new Date().toISOString(),
             },
             ...state.activities,
           ],
-        })),
-      updateTask: (taskId, updates) => {
-        set((state) => {
-          const task = state.tasks.find((t) => t.id === taskId);
-          if (!task) return state;
+        }));
+      });
 
-          const updatedTasks = state.tasks.map((t) =>
-            t.id === taskId ? { ...t, ...updates } : t
-          );
+      return {
+        tasks: initialTasks,
+        activities: initialActivities,
+        taskFilter: 'all',
+        activityFilter: 'all',
+        viewMode: 'list',
 
-          const newActivity = {
-            id: Date.now().toString(),
-            type: 'task_updated' as ActivityType,
-            action: 'Tâche mise à jour',
-            task: task.title,
-            time: new Date().toISOString(),
-          };
+        toggleTask: (id) => {
+          set((state) => ({
+            tasks: state.tasks.map((task) =>
+              task.id === id
+                ? { ...task, isCompleted: !task.isCompleted }
+                : task
+            ),
+          }));
+        },
 
-          return {
-            ...state,
-            tasks: updatedTasks,
-            activities: [newActivity, ...state.activities],
-          };
-        });
-      },
-      deleteTask: (taskId) =>
-        set((state) => {
-          const taskTitle = state.tasks.find((t) => t.id === taskId)?.title || '';
-          return {
+        updateTask: (taskId, updates) => {
+          set((state) => ({
+            tasks: state.tasks.map((task) =>
+              task.id === taskId ? { ...task, ...updates } : task
+            ),
+          }));
+        },
+
+        deleteTask: (taskId) => {
+          set((state) => ({
             tasks: state.tasks.filter((task) => task.id !== taskId),
+          }));
+        },
+
+        reorderTasks: (newTasks) => {
+          set({ tasks: newTasks });
+        },
+
+        setTaskFilter: (filter) => set({ taskFilter: filter }),
+        setActivityFilter: (filter) => set({ activityFilter: filter }),
+        setViewMode: (mode) => set({ viewMode: mode }),
+
+        addActivity: (activity) => {
+          set((state) => ({
             activities: [
               {
-                id: Date.now().toString(),
-                type: 'task_deleted',
-                action: 'a supprimé',
-                task: taskTitle,
+                ...activity,
+                id: crypto.randomUUID(),
                 time: new Date().toISOString(),
               },
               ...state.activities,
             ],
-          };
-        }),
-      reorderTasks: (newTasks) => set({ tasks: newTasks }),
-      setTaskFilter: (filter) => set({ taskFilter: filter }),
-      setActivityFilter: (filter) => set({ activityFilter: filter }),
-      setViewMode: (mode) => set({ viewMode: mode }),
-    }),
+          }));
+        },
+      };
+    },
     {
       name: 'dashboard-storage',
     }

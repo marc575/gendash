@@ -5,8 +5,8 @@ import { useTaskStore } from '@/store/taskStore';
 import { Task } from '@/types/Task';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isToday, isSameMonth, isSameDay, startOfWeek, endOfWeek } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Clock, User, Tag, Plus, Pencil, Trash2 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ChevronLeft, ChevronRight, Clock, User, Tag, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { CreateTaskModal } from '@/components/task/CreateTaskModal';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/Dialog";
@@ -14,11 +14,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 const priorityColors = {
   Low: { bg: 'bg-green-100', text: 'text-green-800', border: 'border-green-200' },
   Medium: { bg: 'bg-yellow-100', text: 'text-yellow-800', border: 'border-yellow-200' },
-  High: { bg: 'bg-orange-100', text: 'text-orange-800', border: 'border-orange-200' },
-  Urgent: { bg: 'bg-red-100', text: 'text-red-800', border: 'border-red-200' }
+  High: { bg: 'bg-red-100', text: 'text-red-800', border: 'border-red-200' }
 };
 
-export default function Calendar() {
+const Calendar = () => {
   const { tasks, deleteTask } = useTaskStore();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [monthTasks, setMonthTasks] = useState<{ [key: string]: Task[] }>({});
@@ -37,6 +36,7 @@ export default function Calendar() {
 
   useEffect(() => {
     const tasksByDay = tasks.reduce((acc: { [key: string]: Task[] }, task) => {
+      if (!task.startTime) return acc;
       const dateKey = format(new Date(task.startTime), 'yyyy-MM-dd');
       if (!acc[dateKey]) {
         acc[dateKey] = [];
@@ -60,12 +60,6 @@ export default function Calendar() {
   const handleDayClick = (day: Date, event: React.MouseEvent) => {
     event.stopPropagation();
     setSelectedDay(isSameDay(selectedDay || new Date(), day) ? null : day);
-  };
-
-  const handleCreateTask = () => {
-    setIsEditMode(false);
-    setSelectedTask(null);
-    setIsCreateModalOpen(true);
   };
 
   const handleViewTask = (task: Task, event: React.MouseEvent) => {
@@ -110,7 +104,7 @@ export default function Calendar() {
               onClick={() => setCurrentDate(new Date())}
               className="hover:bg-white rounded-md px-3"
             >
-              Aujourd'hui
+              Aujourd&#39;hui
             </Button>
             <Button
               variant="ghost"
@@ -186,47 +180,15 @@ export default function Calendar() {
                       <div className="flex-1 font-medium truncate">
                         {task.title}
                       </div>
-                      {isSelected && (
+                      {isSelected && task.startTime && (
                         <div className="flex items-center gap-1 text-gray-500">
                           <Clock className="w-3 h-3" />
                           {format(new Date(task.startTime), 'HH:mm')}
                         </div>
                       )}
                     </div>
-                    {isSelected && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        className="mt-1 space-y-1"
-                      >
-                        {task.assignee && (
-                          <div className="flex items-center gap-1 text-gray-600">
-                            <User className="w-3 h-3" />
-                            {task.assignee.name}
-                          </div>
-                        )}
-                        {task.labels && task.labels.length > 0 && (
-                          <div className="flex items-center gap-1 flex-wrap">
-                            {task.labels.map(label => (
-                              <span
-                                key={label}
-                                className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-600"
-                              >
-                                <Tag className="w-2 h-2" />
-                                {label}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </motion.div>
-                    )}
                   </motion.div>
                 ))}
-                {!isSelected && dayTasks.length > 3 && (
-                  <div className="text-xs text-gray-500 pl-1">
-                    +{dayTasks.length - 3} autres tâches
-                  </div>
-                )}
               </div>
             </motion.div>
           );
@@ -234,67 +196,46 @@ export default function Calendar() {
       </div>
 
       <CreateTaskModal
-        open={isCreateModalOpen}
-        onOpenChange={setIsCreateModalOpen}
-        defaultDate={selectedDay}
-        task={isEditMode ? selectedTask : undefined}
+        isOpen={isCreateModalOpen}
+        onClose={() => {
+          setIsCreateModalOpen(false);
+          setIsEditMode(false);
+        }}
+        task={isEditMode && selectedTask ? selectedTask : undefined}
       />
 
       <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent>
           <DialogHeader>
-            <DialogTitle className="flex items-center justify-between">
-              <span>{selectedTask?.title}</span>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleEditTask}
-                  className="h-8 w-8 p-0"
-                >
-                  <Pencil className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleDeleteTask}
-                  className="h-8 w-8 p-0 text-red-500 hover:text-red-600 hover:bg-red-50"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </DialogTitle>
+            <DialogTitle>Détails de la tâche</DialogTitle>
           </DialogHeader>
           {selectedTask && (
-            <div className="space-y-4 mt-4">
+            <div className="space-y-4">
               <div className="space-y-2">
-                <div className="text-sm font-medium text-gray-500">Description</div>
-                <div className="text-sm">{selectedTask.description || "Aucune description"}</div>
+                <div className="text-sm font-medium text-gray-500">Titre</div>
+                <div className="text-lg font-medium">{selectedTask.title}</div>
               </div>
-              
-              <div className="space-y-2">
-                <div className="text-sm font-medium text-gray-500">Dates</div>
-                <div className="flex items-center gap-4 text-sm">
-                  <div>
-                    <span className="font-medium">Début:</span>{" "}
-                    {format(new Date(selectedTask.startTime), "dd/MM/yyyy HH:mm")}
-                  </div>
-                  {selectedTask.endTime && (
-                    <div>
-                      <span className="font-medium">Fin:</span>{" "}
-                      {format(new Date(selectedTask.endTime), "dd/MM/yyyy HH:mm")}
-                    </div>
-                  )}
+
+              {selectedTask.description && (
+                <div className="space-y-2">
+                  <div className="text-sm font-medium text-gray-500">Description</div>
+                  <div className="text-sm text-gray-700">{selectedTask.description}</div>
                 </div>
+              )}
+
+              <div className="space-y-2">
+                <div className="text-sm font-medium text-gray-500">Date et heure</div>
+                {selectedTask && selectedTask.startTime && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <Clock className="w-4 h-4" />
+                    {format(new Date(selectedTask.startTime), 'PPPp', { locale: fr })}
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">
                 <div className="text-sm font-medium text-gray-500">Priorité</div>
-                <div className={`
-                  inline-flex items-center px-2 py-1 rounded-full text-sm
-                  ${priorityColors[selectedTask.priority].bg}
-                  ${priorityColors[selectedTask.priority].text}
-                `}>
+                <div className={`inline-flex items-center px-2 py-1 rounded-full text-sm ${priorityColors[selectedTask.priority].bg} ${priorityColors[selectedTask.priority].text}`}>
                   {selectedTask.priority}
                 </div>
               </div>
@@ -325,10 +266,31 @@ export default function Calendar() {
                   </div>
                 </div>
               )}
+
+              <div className="flex justify-end gap-2 pt-4">
+                <Button
+                  variant="ghost"
+                  onClick={handleEditTask}
+                  className="flex items-center gap-2"
+                >
+                  <Pencil className="w-4 h-4" />
+                  Modifier
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={handleDeleteTask}
+                  className="flex items-center gap-2"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Supprimer
+                </Button>
+              </div>
             </div>
           )}
         </DialogContent>
       </Dialog>
     </div>
   );
-}
+};
+
+export default Calendar;

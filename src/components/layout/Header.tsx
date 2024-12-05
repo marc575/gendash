@@ -49,7 +49,6 @@ export function Header({ className }: HeaderProps) {
         <div className="flex items-center space-x-4">
           <Button
             variant="ghost"
-            size="icon"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className="w-9 px-0"
           >

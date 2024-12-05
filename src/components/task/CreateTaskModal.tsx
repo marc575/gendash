@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useTaskStore } from '@/store/taskStore';
-import { Task } from '@/types/Task';
+import { Task, TaskPriority, TaskStatus } from '@/types/Task';
 import { v4 as uuidv4 } from 'uuid';
 
 interface CreateTaskModalProps {
@@ -23,6 +23,8 @@ export function CreateTaskModal({ isOpen, onClose, task }: CreateTaskModalProps)
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
   const [assignee, setAssignee] = useState('');
+  const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null);
+  const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);
 
   useEffect(() => {
     if (task) {
@@ -30,8 +32,22 @@ export function CreateTaskModal({ isOpen, onClose, task }: CreateTaskModalProps)
       setDescription(task.description || '');
       setPriority(task.priority);
       setStatus(task.status);
-      setStartTime(task.startTime ? new Date(task.startTime).toISOString().split('T')[0] : '');
-      setEndTime(task.endTime ? new Date(task.endTime).toISOString().split('T')[0] : '');
+      if (task.startTime) {
+        const startDate = new Date(task.startTime);
+        setStartTime(startDate.toISOString().split('T')[0]);
+        setSelectedStartDate(startDate);
+      } else {
+        setStartTime('');
+        setSelectedStartDate(null);
+      }
+      if (task.endTime) {
+        const endDate = new Date(task.endTime);
+        setEndTime(endDate.toISOString().split('T')[0]);
+        setSelectedEndDate(endDate);
+      } else {
+        setEndTime('');
+        setSelectedEndDate(null);
+      }
       setAssignee(task.assignee?.name || '');
     } else {
       resetForm();
@@ -46,33 +62,54 @@ export function CreateTaskModal({ isOpen, onClose, task }: CreateTaskModalProps)
     setStartTime('');
     setEndTime('');
     setAssignee('');
+    setSelectedStartDate(null);
+    setSelectedEndDate(null);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const taskData = {
+    const taskData: Partial<Task> = {
       title,
       description,
-      priority,
-      status,
-      startTime: startTime ? new Date(startTime).toISOString() : null,
-      endTime: endTime ? new Date(endTime).toISOString() : null,
-      assignee: assignee ? { name: assignee } : null,
+      priority: priority as TaskPriority,
+      status: status as TaskStatus,
+      startTime: selectedStartDate ? selectedStartDate.toISOString() : null,
+      endTime: selectedEndDate ? selectedEndDate.toISOString() : null,
+      assignee: assignee ? { id: uuidv4(), name: assignee } : null,
+      project: 'default',
+      labels: [],
+      isCompleted: status === 'completed',
+      participants: [],
+      comments: [],
+      attachments: [],
+      activity: [],
     };
 
     if (task) {
       updateTask(task.id, taskData);
     } else {
-      addTask({
+      const newTask: Task = {
+        ...taskData as Task,
         id: uuidv4(),
         createdAt: new Date().toISOString(),
-        ...taskData,
-      });
+        updatedAt: new Date().toISOString(),
+      };
+      addTask(newTask);
     }
 
     resetForm();
     onClose();
+  };
+
+  const handleStartDateChange = (date: Date | null) => {
+    setSelectedStartDate(date);
+    setStartTime(date ? date.toISOString().split('T')[0] : '');
+  };
+
+  const handleEndDateChange = (date: Date | null) => {
+    setSelectedEndDate(date);
+    setEndTime(date ? date.toISOString().split('T')[0] : '');
   };
 
   return (
@@ -148,7 +185,7 @@ export function CreateTaskModal({ isOpen, onClose, task }: CreateTaskModalProps)
               <Input
                 type="date"
                 value={startTime}
-                onChange={(e) => setStartTime(e.target.value)}
+                onChange={(e) => handleStartDateChange(e.target.valueAsDate)}
               />
             </div>
 
@@ -159,7 +196,7 @@ export function CreateTaskModal({ isOpen, onClose, task }: CreateTaskModalProps)
               <Input
                 type="date"
                 value={endTime}
-                onChange={(e) => setEndTime(e.target.value)}
+                onChange={(e) => handleEndDateChange(e.target.valueAsDate)}
               />
             </div>
           </div>
