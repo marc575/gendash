@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useEffect } from "react";
 import { useSettingsStore } from "@/store/settingsStore";
-import { motion, AnimatePresence } from "framer-motion";
 
 type Theme = "light" | "dark";
 
@@ -53,9 +52,7 @@ export function ThemeProvider({
   };
 
   return (
-    <ThemeProviderContext.Provider value={value}>
       {children}
-    </ThemeProviderContext.Provider>
   );
 }
 
