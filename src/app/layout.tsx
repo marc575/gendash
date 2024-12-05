@@ -2,7 +2,6 @@ import React from 'react';
 import { ClientLayout } from '@/components/layout/ClientLayout';
 import { Outfit } from "next/font/google";
 import "@/styles/globals.css";
-import { ThemeProvider } from "@/providers/ThemeProvider";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -26,13 +25,11 @@ export default function RootLayout({ children }: LayoutProps) {
         <meta name="description" content={metadata.description} />
       </head>
       <body className={`${outfit.variable} bg-background text-foreground antialiased`} suppressHydrationWarning>
-        <ThemeProvider>
-          <div className="relative flex min-h-screen flex-col">
-            <ClientLayout>
-              {children}
-            </ClientLayout>
-          </div>
-        </ThemeProvider>
+        <div className="relative flex min-h-screen flex-col">
+          <ClientLayout>
+            {children}
+          </ClientLayout>
+        </div>
       </body>
     </html>
   );

@@ -1,19 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useTheme } from "@/providers/ThemeProvider";
-import { UserMenu } from "@/components/layout/UserMenu";
 import { cn } from "@/lib/utils";
-import { ListTodo, Moon, Sun } from "lucide-react";
+import { ListTodo } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { UserMenu } from "@/components/layout/UserMenu";
 
 interface HeaderProps {
   className?: string;
 }
 
 export function Header({ className }: HeaderProps) {
-  const { theme, setTheme } = useTheme();
-
   return (
     <header className={cn("border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60", className)}>
       <div className="container flex h-14 items-center justify-between">
@@ -47,18 +44,6 @@ export function Header({ className }: HeaderProps) {
           </nav>
         </div>
         <div className="flex items-center space-x-4">
-          <Button
-            variant="ghost"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="w-9 px-0"
-          >
-            {theme === "dark" ? (
-              <Sun className="h-[1.2rem] w-[1.2rem]" />
-            ) : (
-              <Moon className="h-[1.2rem] w-[1.2rem]" />
-            )}
-            <span className="sr-only">Basculer le thème</span>
-          </Button>
           <UserMenu />
         </div>
       </div>
