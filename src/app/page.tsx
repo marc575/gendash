@@ -113,7 +113,7 @@ export default function Home() {
           {/* Section tâches */}
           <motion.div variants={item} className="grid md:grid-cols-5 grid-cols-1 gap-3">
             <Card className="md:col-span-3 bg-gradient-to-br from-background to-muted/20">
-              <Card.Header className="flex flex-row items-center justify-between border-b pb-6">
+              <Card.Header className="flex flex-row items-center justify-between pb-6">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <div className="p-2 bg-primary/10 rounded-lg">
@@ -144,7 +144,7 @@ export default function Home() {
                   </DropdownMenu>
                 </div>
               </Card.Header>
-              <Card.Content className="pt-6">
+              <Card.Content className="pt-6 px-0 bg-gray-50">
                 {viewMode === 'list' ? <TaskList /> : <TaskGrid />}
               </Card.Content>
             </Card>
