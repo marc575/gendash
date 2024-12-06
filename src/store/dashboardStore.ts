@@ -50,74 +50,63 @@ interface DashboardState {
 
 export const useDashboardStore = create<DashboardState>()(
   persist(
-    (set) => {
-      // Écouter les événements d'activité du taskStore
-      taskEvents.on('activity', (activityData: Omit<Activity, 'id' | 'time'>) => {
+    (set, get) => ({
+      tasks: initialTasks,
+      activities: initialActivities,
+      taskFilter: 'all',
+      activityFilter: 'all',
+      viewMode: 'list',
+
+      toggleTask: (id: string): void => {
         set((state) => ({
-          activities: [
-            {
-              ...activityData,
-              id: crypto.randomUUID(),
-              time: new Date().toISOString(),
-            },
-            ...state.activities,
-          ],
+          tasks: state.tasks.map((task) =>
+            task.id === id ? { ...task, isCompleted: !task.isCompleted } : task
+          ),
         }));
-      });
+      },
 
-      return {
-        tasks: initialTasks,
-        activities: initialActivities,
-        taskFilter: 'all',
-        activityFilter: 'all',
-        viewMode: 'list',
+      updateTask: (taskId: string, updates: Partial<Task>): void => {
+        set((state) => ({
+          tasks: state.tasks.map((task) =>
+            task.id === taskId ? { ...task, ...updates } : task
+          ),
+        }));
+      },
 
-        toggleTask: (id) => {
-          set((state) => ({
-            tasks: state.tasks.map((task) =>
-              task.id === id
-                ? { ...task, isCompleted: !task.isCompleted }
-                : task
-            ),
-          }));
-        },
+      deleteTask: (taskId: string): void => {
+        set((state) => ({
+          tasks: state.tasks.filter((task) => task.id !== taskId),
+        }));
+      },
 
-        updateTask: (taskId, updates) => {
-          set((state) => ({
-            tasks: state.tasks.map((task) =>
-              task.id === taskId ? { ...task, ...updates } : task
-            ),
-          }));
-        },
+      reorderTasks: (newTasks: Task[]): void => {
+        set({ tasks: newTasks });
+      },
 
-        deleteTask: (taskId) => {
-          set((state) => ({
-            tasks: state.tasks.filter((task) => task.id !== taskId),
-          }));
-        },
+      setTaskFilter: (filter: TaskStatus): void => {
+        set({ taskFilter: filter });
+      },
 
-        reorderTasks: (newTasks) => {
-          set({ tasks: newTasks });
-        },
+      setActivityFilter: (filter: ActivityType | 'all'): void => {
+        set({ activityFilter: filter });
+      },
 
-        setTaskFilter: (filter) => set({ taskFilter: filter }),
-        setActivityFilter: (filter) => set({ activityFilter: filter }),
-        setViewMode: (mode) => set({ viewMode: mode }),
+      setViewMode: (mode: ViewMode): void => {
+        set({ viewMode: mode });
+      },
 
-        addActivity: (activity) => {
-          set((state) => ({
-            activities: [
-              {
-                ...activity,
-                id: crypto.randomUUID(),
-                time: new Date().toISOString(),
-              },
-              ...state.activities,
-            ],
-          }));
-        },
-      };
-    },
+      addActivity: (activity: Omit<Activity, 'id' | 'time'>): void => {
+        const newActivity: Activity = {
+          id: crypto.randomUUID(),
+          time: new Date().toISOString(),
+          ...activity,
+        };
+
+        set((state) => ({
+          activities: [newActivity, ...state.activities],
+        }));
+      },
+    }),
     {
       name: 'dashboard-storage',
     }

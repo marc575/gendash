@@ -1,12 +1,12 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 
-interface CardProps extends React.HTMLAttributes<HTMLDivElement> {}
-interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {}
-interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {}
-interface CardTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {}
-interface CardDescriptionProps extends React.HTMLAttributes<HTMLParagraphElement> {}
-interface CardContentProps extends React.HTMLAttributes<HTMLDivElement> {}
+type CardProps = React.HTMLAttributes<HTMLDivElement>
+type CardHeaderProps = React.HTMLAttributes<HTMLDivElement>
+type CardFooterProps = React.HTMLAttributes<HTMLDivElement>
+type CardTitleProps = React.HTMLAttributes<HTMLHeadingElement>
+type CardDescriptionProps = React.HTMLAttributes<HTMLParagraphElement>
+type CardContentProps = React.HTMLAttributes<HTMLDivElement>
 
 // Définir le type du composant Card avec ses sous-composants
 type CardComponent = React.ForwardRefExoticComponent<CardProps & React.RefAttributes<HTMLDivElement>> & {

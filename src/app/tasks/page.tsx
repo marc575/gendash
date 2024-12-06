@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Plus, Search, Grid, List, Filter as FilterIcon, SlidersHorizontal } from 'lucide-react';
+import { Plus, Grid, List, Filter as FilterIcon, SlidersHorizontal } from 'lucide-react';
 import { useTaskStore } from '@/store/taskStore';
 import { CreateTaskModal } from '@/components/task/CreateTaskModal';
 import { TaskCard } from '@/components/task/TaskCard';

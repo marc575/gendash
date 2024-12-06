@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { ListTodo } from "lucide-react";
-import { Button } from "@/components/ui/Button";
 import { UserMenu } from "@/components/layout/UserMenu";
 
 interface HeaderProps {

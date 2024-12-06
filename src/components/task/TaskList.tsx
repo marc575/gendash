@@ -32,7 +32,10 @@ export function TaskList() {
 
   const filteredTasks = tasks.filter(task => {
     if (taskFilter === 'all') return true;
-    return ;
+    if (taskFilter === 'open') return !task.done && task.status !== 'archived';
+    if (taskFilter === 'closed') return task.done || task.status === 'completed';
+    if (taskFilter === 'archived') return task.status === 'archived';
+    return task.status === taskFilter;
   });
   
   const handleToggleComplete = (task: Task) => {

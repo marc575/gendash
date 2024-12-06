@@ -13,7 +13,7 @@ import {
   Users
 } from 'lucide-react';
 import { useTaskStore } from '@/store/taskStore';
-import { format, isToday, isThisWeek, isBefore } from 'date-fns';
+import { format, isToday, isThisWeek } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';

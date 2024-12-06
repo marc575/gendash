@@ -2,16 +2,27 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Task, TaskStatus, TaskPriority, User } from '@/types/Task';
 
+interface TaskEvent {
+  taskId?: string;
+  type: string;
+  data: unknown;
+}
+
+type EventCallback = (event: TaskEvent) => void;
+
 // Event emitter pour la communication entre stores
 const createEventEmitter = () => {
-  const listeners: { [key: string]: Function[] } = {};
+  const listeners: { [key: string]: EventCallback[] } = {};
+  
   return {
-    emit: (event: string, data: any) => {
+    emit: (event: string, data: unknown): void => {
       if (listeners[event]) {
-        listeners[event].forEach(listener => listener(data));
+        listeners[event].forEach((listener: EventCallback): void => {
+          listener({ type: event, data });
+        });
       }
     },
-    on: (event: string, callback: Function) => {
+    on: (event: string, callback: EventCallback): void => {
       if (!listeners[event]) {
         listeners[event] = [];
       }
@@ -22,7 +33,26 @@ const createEventEmitter = () => {
 
 export const taskEvents = createEventEmitter();
 
-const calculateStats = (tasks: Task[]) => {
+const calculateStats = (tasks: Task[]): {
+  total: number;
+  completed: number;
+  inProgress: number;
+  pending: number;
+  cancelled: number;
+  byPriority: {
+    High: number;
+    Medium: number;
+    Low: number;
+  };
+  byLabel: Record<string, number>;
+  byAssignee: Record<string, number>;
+  byStatus: {
+    open: number;
+    closed: number;
+    completed: number;
+    archived: number;
+  };
+} => {
   const stats = {
     total: tasks.length,
     completed: 0,
@@ -129,7 +159,7 @@ export const useTaskStore = create<TaskState>()(
       },
       stats: calculateStats([]),
 
-      addTask: (task: Task) => {
+      addTask: (task: Task): void => {
         set((state) => {
           const newTasks = [...state.tasks, task];
           return {
@@ -139,7 +169,7 @@ export const useTaskStore = create<TaskState>()(
         });
       },
 
-      updateTask: (taskId: string, updates: Partial<Task>) => {
+      updateTask: (taskId: string, updates: Partial<Task>): void => {
         set((state) => {
           const newTasks = state.tasks.map((task) =>
             task.id === taskId ? { ...task, ...updates } : task
@@ -151,7 +181,7 @@ export const useTaskStore = create<TaskState>()(
         });
       },
 
-      deleteTask: (taskId: string) => {
+      deleteTask: (taskId: string): void => {
         set((state) => {
           const newTasks = state.tasks.filter((task) => task.id !== taskId);
           return {
@@ -161,15 +191,15 @@ export const useTaskStore = create<TaskState>()(
         });
       },
 
-      setFilter: (filter: any) => {
+      setFilter: (filter: any): void => {
         set({ filter });
       },
 
-      setSort: (sort: any) => {
+      setSort: (sort: any): void => {
         set({ sort });
       },
 
-      addComment: (taskId: string, content: string, user: User) => {
+      addComment: (taskId: string, content: string, user: User): void => {
         set((state) => {
           const newTasks = state.tasks.map((task) => {
             if (task.id === taskId) {
@@ -193,7 +223,7 @@ export const useTaskStore = create<TaskState>()(
         });
       },
 
-      addAttachment: (taskId: string, attachment) => {
+      addAttachment: (taskId: string, attachment: Omit<NonNullable<Task['attachments']>[0], 'id'>): void => {
         set((state) => {
           const newTasks = state.tasks.map((task) => {
             if (task.id === taskId) {
@@ -223,7 +253,7 @@ export const useTaskStore = create<TaskState>()(
         });
       },
 
-      assignTask: (taskId: string, userId: string) => {
+      assignTask: (taskId: string, userId: string): void => {
         set((state) => {
           const newTasks = state.tasks.map((task) => {
             if (task.id === taskId) {
@@ -249,7 +279,7 @@ export const useTaskStore = create<TaskState>()(
         });
       },
 
-      updateTaskStatus: (taskId: string, newStatus: TaskStatus) => {
+      updateTaskStatus: (taskId: string, newStatus: TaskStatus): void => {
         set((state) => {
           const newTasks = state.tasks.map((task) => {
             if (task.id === taskId) {
@@ -277,7 +307,7 @@ export const useTaskStore = create<TaskState>()(
         });
       },
 
-      addSubtask: (parentId: string, subtask: Task) => {
+      addSubtask: (parentId: string, subtask: Task): void => {
         set((state) => {
           const newTasks = state.tasks.map((task) => {
             if (task.id === parentId) {
@@ -295,7 +325,7 @@ export const useTaskStore = create<TaskState>()(
         });
       },
 
-      updateTaskPriority: (taskId: string, priority: TaskPriority) => {
+      updateTaskPriority: (taskId: string, priority: TaskPriority): void => {
         set((state) => {
           const newTasks = state.tasks.map((task) => {
             if (task.id === taskId) {
@@ -322,7 +352,7 @@ export const useTaskStore = create<TaskState>()(
         });
       },
 
-      addTaskLabel: (taskId: string, label: string) => {
+      addTaskLabel: (taskId: string, label: string): void => {
         set((state) => {
           const newTasks = state.tasks.map((task) => {
             if (task.id === taskId && !task.labels.includes(label)) {
@@ -347,7 +377,7 @@ export const useTaskStore = create<TaskState>()(
         });
       },
 
-      removeTaskLabel: (taskId: string, label: string) => {
+      removeTaskLabel: (taskId: string, label: string): void => {
         set((state) => {
           const newTasks = state.tasks.map((task) => {
             if (task.id === taskId) {
@@ -373,7 +403,7 @@ export const useTaskStore = create<TaskState>()(
         });
       },
 
-      archiveTask: (taskId: string) => {
+      archiveTask: (taskId: string): void => {
         set((state) => {
           const newTasks = state.tasks.map((task) => {
             if (task.id === taskId) {
@@ -401,12 +431,12 @@ export const useTaskStore = create<TaskState>()(
         });
       },
 
-      calculateStats: () => {
+      calculateStats: (): any => {
         const { tasks } = get();
         return calculateStats(tasks);
       },
 
-      reorderTasks: (newTasks: Task[]) => {
+      reorderTasks: (newTasks: Task[]): void => {
         set({ tasks: newTasks });
       },
     }),
