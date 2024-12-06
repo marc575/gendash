@@ -10,7 +10,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: 'TaskMaster',
+  title: 'Tatchou Marc',
   description: 'Application de gestion de tâches moderne et intuitive',
   keywords: ['tâches', 'gestion', 'productivité', 'organisation', 'planification'],
   authors: [{ name: 'Tatchou Marc' }],

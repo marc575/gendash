@@ -8,8 +8,6 @@ import {
   ListTodo,
   Calendar,
   Settings,
-  BarChart3,
-  Users,
   FolderKanban,
 } from "lucide-react";
 
