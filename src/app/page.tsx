@@ -102,7 +102,7 @@ export default function Home() {
                   <div>
                     <Card.Title>Citation du jour</Card.Title>
                     <Card.Description className="text-lg mt-2 italic">
-                      'La productivité n'est pas un accident. C'est toujours le résultat d'un engagement envers l'excellence, une planification intelligente et un effort ciblé.'
+                      &quot;La productivité n&apos;est pas un accident. C&apos;est toujours le résultat d&apos;un engagement envers l&apos;excellence, une planification intelligente et un effort ciblé.&quot;
                     </Card.Description>
                   </div>
                 </div>
@@ -159,7 +159,7 @@ export default function Home() {
                     </div>
                     <Card.Title>Activités récentes</Card.Title>
                   </div>
-                  <Card.Description>Votre historique d'actions</Card.Description>
+                  <Card.Description>Votre historique d&apos;actions</Card.Description>
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger className="p-2 hover:bg-accent/10 rounded-lg transition-colors">

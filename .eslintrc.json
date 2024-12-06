@@ -1,5 +1,9 @@
 {
-  "extends": ["next/core-web-vitals"],
+  "extends": [
+    "next/core-web-vitals",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking"
+  ],
   "parser": "@typescript-eslint/parser",
   "plugins": ["@typescript-eslint"],
   "parserOptions": {
@@ -16,16 +20,6 @@
     "@typescript-eslint/no-unsafe-call": "warn",
     "@typescript-eslint/no-unsafe-argument": "warn",
     "@typescript-eslint/no-empty-interface": "warn",
-    "@typescript-eslint/no-unsafe-function-type": "warn",
-    "@typescript-eslint/ban-types": [
-      "warn",
-      {
-        "types": {
-          "{}": false,
-          "Function": false
-        },
-        "extendDefaults": true
-      }
-    ]
+    "@typescript-eslint/no-unsafe-function-type": "warn"
   }
 }
