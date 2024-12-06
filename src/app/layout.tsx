@@ -17,17 +17,6 @@ export const metadata: Metadata = {
   creator: 'Tatchou Marc',
   publisher: 'TaskMaster',
   applicationName: 'TaskMaster',
-  colorScheme: 'dark light',
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#09090b' }
-  ],
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-  },
   icons: [
     { rel: 'icon', url: '/code.svg' },
     { rel: 'apple-touch-icon', url: '/code.svg' }

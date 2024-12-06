@@ -50,9 +50,9 @@ export function ClientLayout({ children }: ClientLayoutProps) {
       {!isSidebarOpen && (
         <button
           onClick={() => setIsSidebarOpen(true)}
-          className="fixed bottom-4 right-4 z-50 rounded-full bg-primary-600 p-3 text-white shadow-lg hover:bg-primary-700 transition-colors lg:hidden"
+          className="fixed bottom-4 right-4 z-50 rounded-full bg-primary-600 p-3 text-blue shadow-lg hover:bg-primary-700 transition-colors lg:hidden"
         >
-          <Menu className="h-6 w-6" />
+          <Menu className="h-6 w-6 " />
         </button>
       )}
     </div>
