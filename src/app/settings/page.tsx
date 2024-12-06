@@ -10,7 +10,7 @@ export default function Settings() {
   const settings = useSettingsStore();
 
   return (
-    <div className="container mx-auto py-8 max-w-3xl">
+    <div className="py-md-4 max-w-3xl">
       <h1 className="text-2xl font-bold mb-8">Paramètres</h1>
 
       <div className="space-y-8">

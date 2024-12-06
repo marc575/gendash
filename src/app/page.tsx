@@ -36,7 +36,7 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b to-background/80 pb-8">
-      <div className="container mx-auto px-4 py-8">
+      <div className="px-md-4 py-8">
         <motion.div 
           variants={container}
           initial="hidden"
