@@ -74,9 +74,14 @@ const Calendar = () => {
     setIsCreateModalOpen(true);
   };
 
-  const handleDeleteTask = async () => {
+  const handleAsyncAction = (callback: () => void) => (event: React.MouseEvent) => {
+    event.preventDefault();
+    callback();
+  };
+
+  const handleDeleteTask = () => {
     if (selectedTask) {
-      await deleteTask(selectedTask.id);
+      deleteTask(selectedTask.id);
       setIsViewModalOpen(false);
       setSelectedTask(null);
     }
@@ -278,7 +283,7 @@ const Calendar = () => {
                 </Button>
                 <Button
                   variant="destructive"
-                  onClick={handleDeleteTask}
+                  onClick={handleAsyncAction(handleDeleteTask)}
                   className="flex items-center gap-2"
                 >
                   <Trash2 className="w-4 h-4" />
