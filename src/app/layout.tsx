@@ -31,7 +31,7 @@ export default function RootLayout({ children }: LayoutProps) {
   return (
     <html lang="fr" suppressHydrationWarning>
       <body className={`${outfit.variable} bg-background text-foreground antialiased`} suppressHydrationWarning>
-        <div className="relative flex min-h-screen flex-col">
+        <div className="relative flex min-h-screen flex-col mb-5">
           <ClientLayout>
             {children}
           </ClientLayout>

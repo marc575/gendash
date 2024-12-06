@@ -41,16 +41,6 @@ const navItems: NavItem[] = [
     icon: Calendar,
   },
   {
-    title: "Équipe",
-    href: "/team",
-    icon: Users,
-  },
-  {
-    title: "Analyses",
-    href: "/analytics",
-    icon: BarChart3,
-  },
-  {
     title: "Paramètres",
     href: "/settings",
     icon: Settings,

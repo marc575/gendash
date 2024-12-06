@@ -111,7 +111,7 @@ export default function Home() {
           </motion.div>
 
           {/* Section tâches */}
-          <motion.div variants={item} className="grid md:grid-cols-5 gap-6">
+          <motion.div variants={item} className="grid md:grid-cols-5 grid-cols-1 gap-3">
             <Card className="md:col-span-3 bg-gradient-to-br from-background to-muted/20">
               <Card.Header className="flex flex-row items-center justify-between border-b pb-6">
                 <div className="space-y-1">

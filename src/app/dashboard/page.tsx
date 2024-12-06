@@ -124,7 +124,7 @@ export default function Dashboard() {
           className="flex items-center gap-2"
         >
           <BarChart3 className="h-4 w-4" />
-          Voir les rapports
+          Rapports
         </Button>
       </div>
 
