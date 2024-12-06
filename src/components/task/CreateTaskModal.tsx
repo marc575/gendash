@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/Input';
 import { useTaskStore } from '@/store/taskStore';
 import { Task, TaskPriority, TaskStatus } from '@/types/Task';
 import { v4 as uuidv4 } from 'uuid';
+import { X, Save } from 'lucide-react';
 
 interface CreateTaskModalProps {
   isOpen: boolean;
@@ -215,15 +216,19 @@ export function CreateTaskModal({ isOpen, onClose, task }: CreateTaskModalProps)
           <div className="flex justify-end gap-3 pt-4">
             <Button
               type="button"
-              variant="ghost"
+              variant="outline"
               onClick={onClose}
+              className="flex items-center gap-2"
             >
+              <X className="w-5 h-5" />
               Annuler
             </Button>
             <Button
               type="submit"
               variant="primary"
+              className="flex items-center gap-2"
             >
+              <Save className="w-5 h-5" />
               {task ? 'Modifier' : 'Créer'}
             </Button>
           </div>

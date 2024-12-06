@@ -150,10 +150,11 @@ export default function TasksPage() {
             </p>
           </div>
           <Button
+            variant="primary"
             onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 shadow-lg hover:shadow-xl transition-all"
+            className="flex items-center gap-2"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="w-5 h-5" />
             Nouvelle tâche
           </Button>
         </motion.div>

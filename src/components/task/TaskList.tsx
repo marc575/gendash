@@ -122,8 +122,9 @@ export function TaskList() {
                   exit={{ opacity: 0, y: -20 }}
                   layout
                 >
-                  <TaskCard 
-                    task={task} 
+                  <TaskCard
+                    key={task.id}
+                    task={task}
                     onToggleComplete={handleToggleComplete}
                     onEdit={handleEdit}
                     onDelete={handleDelete}

@@ -9,6 +9,8 @@ type ButtonSize = 'sm' | 'md' | 'lg';
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
+  icon?: React.ReactNode;
+  iconPosition?: 'left' | 'right';
   className?: string;
   children: React.ReactNode;
 }
@@ -16,6 +18,8 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 export const Button: React.FC<ButtonProps> = ({
   variant = 'primary', 
   size = 'md',
+  icon,
+  iconPosition = 'left',
   className,
   children,
   ...props
@@ -29,6 +33,7 @@ export const Button: React.FC<ButtonProps> = ({
     variant === 'secondary' && 'bg-blue-100 text-blue-700 hover:bg-blue-200',
     variant === 'ghost' && 'bg-transparent text-blue-600 hover:bg-blue-50',
     variant === 'destructive' && 'bg-red-600 text-white hover:bg-red-700 shadow-sm',
+    variant === 'outline' && 'border border-gray-300 bg-white hover:bg-gray-100',
     
     // Sizes
     size === 'sm' && 'px-2 py-1 text-xs',
@@ -46,7 +51,9 @@ export const Button: React.FC<ButtonProps> = ({
       className={baseStyles} 
       {...props}
     >
+      {icon && iconPosition === 'left' && <span className="mr-2">{icon}</span>}
       {children}
+      {icon && iconPosition === 'right' && <span className="ml-2">{icon}</span>}
     </button>
   );
 };

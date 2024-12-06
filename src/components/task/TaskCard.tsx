@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/Avatar';
-import { Clock, Calendar, Edit2, Trash2, GripVertical, CheckCircle2 } from 'lucide-react';
+import { Clock, Calendar, Edit2, Trash2, GripVertical, CheckCircle2, Pencil, X, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -64,12 +64,12 @@ export function TaskCard({ task, onEdit, onDelete, onToggleComplete }: TaskCardP
               type="button"
               onClick={() => onToggleComplete(task)}
               className={`flex items-center justify-center flex-shrink-0 w-5 h-5 rounded-full border-2 ${
-                task.done
+                task.isCompleted
                   ? 'bg-green-500 border-green-500 text-white'
                   : 'border-muted-foreground/30 hover:border-muted-foreground/50'
               } transition-colors`}
             >
-              {task.done && (
+              {task.isCompleted && (
                 <CheckCircle2 className="w-4 h-4" />
               )}
             </button>
@@ -84,17 +84,19 @@ export function TaskCard({ task, onEdit, onDelete, onToggleComplete }: TaskCardP
             </Badge>
             <Button
               variant="ghost"
-              className="h-8 w-8 text-muted-foreground/60 hover:text-muted-foreground"
+              size="sm"
               onClick={() => onEdit(task)}
+              className="flex items-center gap-2"
             >
-              <Edit2 className="h-4 w-4" />
+              <Pencil className="w-4 h-4" />
             </Button>
             <Button
-              variant="ghost"
-              className="h-8 w-8 text-muted-foreground/60 hover:text-red-500"
+              variant="destructive"
+              size="sm"
               onClick={() => onDelete(task)}
+              className="flex items-center gap-2"
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="w-4 h-4" />
             </Button>
           </div>
         </Card.Header>
@@ -103,7 +105,7 @@ export function TaskCard({ task, onEdit, onDelete, onToggleComplete }: TaskCardP
         <Card.Content className="space-y-4">
           <div className="min-w-0">
             <h3 className={`font-bold text-base ${
-              task.done ? 'line-through text-muted-foreground' : ''
+              task.isCompleted ? 'line-through text-muted-foreground' : ''
             }`}>
               {task.title}
             </h3>

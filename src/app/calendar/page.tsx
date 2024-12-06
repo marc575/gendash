@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useTaskStore } from '@/store/taskStore';
 import { Task } from '@/types/Task';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isToday, isSameMonth, isSameDay, startOfWeek, endOfWeek, addDays, subWeeks, addWeeks, subMonths, addMonths } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isToday, isSameMonth, isSameDay, startOfWeek, endOfWeek, subWeeks, addWeeks, subMonths, addMonths } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Clock, User, Tag, Pencil, Trash2 } from 'lucide-react';
@@ -117,7 +117,7 @@ const Calendar = () => {
               variant="ghost"
               size="sm"
               onClick={previousPeriod}
-              className="hover:bg-white rounded-md"
+              className="hover:bg-white rounded-md flex items-center"
             >
               <ChevronLeft className="w-5 h-5" />
             </Button>
@@ -133,7 +133,7 @@ const Calendar = () => {
               variant="ghost"
               size="sm"
               onClick={nextPeriod}
-              className="hover:bg-white rounded-md"
+              className="hover:bg-white rounded-md flex items-center"
             >
               <ChevronRight className="w-5 h-5" />
             </Button>
