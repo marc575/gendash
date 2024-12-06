@@ -102,7 +102,7 @@ const Calendar = () => {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="py-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-8">
         <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
           <div className="flex items-center gap-2">

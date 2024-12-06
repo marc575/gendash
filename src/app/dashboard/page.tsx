@@ -58,7 +58,7 @@ const TaskProgressCard: React.FC<{
   const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
   
   return (
-    <div className="bg-white p-6 rounded-xl shadow-sm">
+    <div className="bg-white py-6 rounded-xl shadow-sm">
       <h3 className="text-gray-500 text-sm font-medium mb-4">{title}</h3>
       <div className="flex items-center justify-between mb-2">
         <span className="text-2xl font-bold text-gray-900">{completed}/{total}</span>
