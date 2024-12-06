@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/Avatar';
-import { Clock, Calendar, Edit2, Trash2, GripVertical, CheckCircle2, Pencil, X, Check } from 'lucide-react';
+import { Clock, Calendar, Trash2, GripVertical, CheckCircle2, Pencil, } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
