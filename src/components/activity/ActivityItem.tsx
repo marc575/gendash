@@ -1,23 +1,41 @@
 "use client";
 
-import { Activity } from "@/store/dashboardStore";
+import { Activity, ActivityType } from "@/store/dashboardStore";
 import { formatRelativeTime } from "@/lib/utils";
-import { MessageSquare, CheckCircle2, Plus } from "lucide-react";
+import { 
+  MessageSquare, 
+  CheckCircle2, 
+  Plus, 
+  RefreshCw, 
+  Trash2, 
+  ArrowRightLeft, 
+  UserPlus, 
+  ArrowUpDown, 
+  Tag, 
+  Archive 
+} from "lucide-react";
+import { LucideIcon } from "lucide-react";
 
 interface ActivityItemProps {
   activity: Activity;
 }
 
-const activityIcons = {
+const activityIcons: Record<ActivityType, LucideIcon> = {
   task_completed: CheckCircle2,
   task_created: Plus,
   comment_added: MessageSquare,
-  task_updated: CheckCircle2,
-  task_deleted: CheckCircle2,
+  task_updated: RefreshCw,
+  task_deleted: Trash2,
+  status_change: ArrowRightLeft,
+  assignment: UserPlus,
+  priority_change: ArrowUpDown,
+  label_added: Tag,
+  label_removed: Tag,
+  task_archived: Archive
 };
 
 export function ActivityItem({ activity }: ActivityItemProps) {
-  const Icon = activityIcons[activity.type];
+  const Icon = activityIcons[activity.type] || RefreshCw;
 
   return (
     <div className="flex items-start space-x-3">
