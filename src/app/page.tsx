@@ -102,7 +102,7 @@ export default function Home() {
                   <div>
                     <Card.Title>Citation du jour</Card.Title>
                     <Card.Description className="text-lg mt-2 italic">
-                      &quot;La productivité n&apos;est pas un accident. C&apos;est toujours le résultat d&apos;un engagement envers l&apos;excellence, une planification intelligente et un effort ciblé.&quot;
+                      'La productivité n'est pas un accident. C'est toujours le résultat d'un engagement envers l'excellence, une planification intelligente et un effort ciblé.'
                     </Card.Description>
                   </div>
                 </div>

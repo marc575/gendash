@@ -2,6 +2,43 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Task, TaskStatus, TaskPriority, User } from '@/types/Task';
 
+// Types pour le filtre et le tri
+interface TaskFilter {
+  status: TaskStatus[];
+  priority: TaskPriority[];
+  labels: string[];
+  assignee: string[];
+  project: string[];
+  isCompleted: boolean;
+}
+
+interface TaskSort {
+  field: keyof Task;
+  direction: 'asc' | 'desc';
+}
+
+// Types pour les statistiques
+interface TaskStats {
+  total: number;
+  completed: number;
+  inProgress: number;
+  pending: number;
+  cancelled: number;
+  byPriority: {
+    High: number;
+    Medium: number;
+    Low: number;
+  };
+  byLabel: Record<string, number>;
+  byAssignee: Record<string, number>;
+  byStatus: {
+    open: number;
+    closed: number;
+    completed: number;
+    archived: number;
+  };
+}
+
 interface TaskEvent {
   taskId?: string;
   type: string;
@@ -33,27 +70,8 @@ const createEventEmitter = () => {
 
 export const taskEvents = createEventEmitter();
 
-const calculateStats = (tasks: Task[]): {
-  total: number;
-  completed: number;
-  inProgress: number;
-  pending: number;
-  cancelled: number;
-  byPriority: {
-    High: number;
-    Medium: number;
-    Low: number;
-  };
-  byLabel: Record<string, number>;
-  byAssignee: Record<string, number>;
-  byStatus: {
-    open: number;
-    closed: number;
-    completed: number;
-    archived: number;
-  };
-} => {
-  const stats = {
+const calculateStats = (tasks: Task[]): TaskStats => {
+  const stats: TaskStats = {
     total: tasks.length,
     completed: 0,
     inProgress: 0,
@@ -64,8 +82,8 @@ const calculateStats = (tasks: Task[]): {
       Medium: 0,
       Low: 0
     },
-    byLabel: {} as Record<string, number>,
-    byAssignee: {} as Record<string, number>,
+    byLabel: {},
+    byAssignee: {},
     byStatus: {
       open: 0,
       closed: 0,
@@ -120,14 +138,14 @@ const calculateStats = (tasks: Task[]): {
 
 interface TaskState {
   tasks: Task[];
-  filter: any;
-  sort: any;
-  stats: any;
+  filter: TaskFilter;
+  sort: TaskSort;
+  stats: TaskStats;
   addTask: (task: Task) => void;
   updateTask: (taskId: string, updates: Partial<Task>) => void;
   deleteTask: (taskId: string) => void;
-  setFilter: (filter: any) => void;
-  setSort: (sort: any) => void;
+  setFilter: (filter: TaskFilter) => void;
+  setSort: (sort: TaskSort) => void;
   addComment: (taskId: string, content: string, user: User) => void;
   addAttachment: (taskId: string, attachment: Omit<NonNullable<Task['attachments']>[0], 'id'>) => void;
   assignTask: (taskId: string, userId: string) => void;
@@ -137,7 +155,7 @@ interface TaskState {
   addTaskLabel: (taskId: string, label: string) => void;
   removeTaskLabel: (taskId: string, label: string) => void;
   archiveTask: (taskId: string) => void;
-  calculateStats: () => any;
+  calculateStats: () => TaskStats;
   reorderTasks: (newTasks: Task[]) => void;
 }
 
@@ -191,11 +209,11 @@ export const useTaskStore = create<TaskState>()(
         });
       },
 
-      setFilter: (filter: any): void => {
+      setFilter: (filter: TaskFilter): void => {
         set({ filter });
       },
 
-      setSort: (sort: any): void => {
+      setSort: (sort: TaskSort): void => {
         set({ sort });
       },
 
@@ -203,15 +221,17 @@ export const useTaskStore = create<TaskState>()(
         set((state) => {
           const newTasks = state.tasks.map((task) => {
             if (task.id === taskId) {
-              const newComment = {
-                id: crypto.randomUUID(),
-                content,
-                author: user,
-                createdAt: new Date(),
-              };
               return {
                 ...task,
-                comments: [...(task.comments || []), newComment],
+                comments: [
+                  ...(task.comments || []),
+                  {
+                    id: crypto.randomUUID(),
+                    content,
+                    author: user,
+                    createdAt: new Date(),
+                  },
+                ],
               };
             }
             return task;
@@ -227,21 +247,15 @@ export const useTaskStore = create<TaskState>()(
         set((state) => {
           const newTasks = state.tasks.map((task) => {
             if (task.id === taskId) {
-              const newAttachment = {
-                ...attachment,
-                id: crypto.randomUUID(),
-                uploadedAt: new Date(),
-              };
-              taskEvents.emit('activity', {
-                type: 'attachment_added',
-                action: `Attachment ${attachment.name} added`,
-                task: taskId,
-                user: attachment.uploadedBy,
-              });
               return {
                 ...task,
-                attachments: [...(task.attachments || []), newAttachment],
-                updatedAt: new Date().toISOString(),
+                attachments: [
+                  ...(task.attachments || []),
+                  {
+                    id: crypto.randomUUID(),
+                    ...attachment,
+                  },
+                ],
               };
             }
             return task;
@@ -257,18 +271,16 @@ export const useTaskStore = create<TaskState>()(
         set((state) => {
           const newTasks = state.tasks.map((task) => {
             if (task.id === taskId) {
-              const assignee = { id: userId, name: `User ${userId}` };
-              taskEvents.emit('activity', {
-                type: 'assignment',
-                action: `Task assigned to ${assignee.name}`,
-                task: taskId,
-                user: assignee,
-              });
-              return {
-                ...task,
-                assignee,
-                updatedAt: new Date().toISOString(),
-              };
+              // Trouver l'utilisateur dans la liste des participants
+              const assignee = task.participants.find(
+                (participant) => participant.id === userId
+              );
+              if (assignee) {
+                return {
+                  ...task,
+                  assignee,
+                };
+              }
             }
             return task;
           });
@@ -283,19 +295,20 @@ export const useTaskStore = create<TaskState>()(
         set((state) => {
           const newTasks = state.tasks.map((task) => {
             if (task.id === taskId) {
-              taskEvents.emit('activity', {
-                type: 'status_change',
-                action: `Status changed from ${task.status} to ${newStatus}`,
-                task: taskId,
-                previousValue: task.status,
-                newValue: newStatus,
-                user: task.assignee || { id: 'system', name: 'System' },
-              });
+              const updates: Partial<Task> = {
+                status: newStatus,
+              };
+
+              if (newStatus === 'completed') {
+                updates.completedAt = new Date().toISOString();
+                updates.done = true;
+              } else if (newStatus === 'archived') {
+                updates.done = true;
+              }
+
               return {
                 ...task,
-                status: newStatus,
-                completedAt: newStatus === 'completed' ? new Date().toISOString() : task.completedAt,
-                updatedAt: new Date().toISOString(),
+                ...updates,
               };
             }
             return task;
@@ -329,18 +342,14 @@ export const useTaskStore = create<TaskState>()(
         set((state) => {
           const newTasks = state.tasks.map((task) => {
             if (task.id === taskId) {
-              taskEvents.emit('activity', {
-                type: 'priority_change',
-                action: `Priority changed from ${task.priority} to ${priority}`,
-                task: taskId,
-                previousValue: task.priority,
-                newValue: priority,
-                user: task.assignee || { id: 'system', name: 'System' },
-              });
-              return {
-                ...task,
+              const updates: Partial<Task> = {
                 priority,
                 updatedAt: new Date().toISOString(),
+              };
+
+              return {
+                ...task,
+                ...updates,
               };
             }
             return task;
@@ -356,12 +365,6 @@ export const useTaskStore = create<TaskState>()(
         set((state) => {
           const newTasks = state.tasks.map((task) => {
             if (task.id === taskId && !task.labels.includes(label)) {
-              taskEvents.emit('activity', {
-                type: 'label_added',
-                action: `Label "${label}" added`,
-                task: taskId,
-                user: task.assignee || { id: 'system', name: 'System' },
-              });
               return {
                 ...task,
                 labels: [...task.labels, label],
@@ -381,16 +384,9 @@ export const useTaskStore = create<TaskState>()(
         set((state) => {
           const newTasks = state.tasks.map((task) => {
             if (task.id === taskId) {
-              const updatedLabels = task.labels.filter((l) => l !== label);
-              taskEvents.emit('activity', {
-                type: 'label_removed',
-                action: `Label "${label}" removed`,
-                task: taskId,
-                user: task.assignee || { id: 'system', name: 'System' },
-              });
               return {
                 ...task,
-                labels: updatedLabels,
+                labels: task.labels.filter((l) => l !== label),
                 updatedAt: new Date().toISOString(),
               };
             }
@@ -407,19 +403,15 @@ export const useTaskStore = create<TaskState>()(
         set((state) => {
           const newTasks = state.tasks.map((task) => {
             if (task.id === taskId) {
-              const newStatus: TaskStatus = 'archived';
-              taskEvents.emit('activity', {
-                type: 'task_archived',
-                action: 'Task archived',
-                task: taskId,
-                previousValue: task.status,
-                newValue: newStatus,
-                user: task.assignee || { id: 'system', name: 'System' },
-              });
+              const updates: Partial<Task> = {
+                status: 'archived',
+                done: true,
+                updatedAt: new Date().toISOString(),
+              };
+
               return {
                 ...task,
-                status: newStatus,
-                updatedAt: new Date().toISOString(),
+                ...updates,
               };
             }
             return task;
@@ -431,7 +423,7 @@ export const useTaskStore = create<TaskState>()(
         });
       },
 
-      calculateStats: (): any => {
+      calculateStats: (): TaskStats => {
         const { tasks } = get();
         return calculateStats(tasks);
       },

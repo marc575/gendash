@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { initialTasks, initialActivities } from '@/data/initialData';
 import { Task } from '@/types/Task';
-import { taskEvents } from './taskStore';
 
 export type ActivityType = 
   | 'task_completed' 
@@ -50,7 +49,7 @@ interface DashboardState {
 
 export const useDashboardStore = create<DashboardState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       tasks: initialTasks,
       activities: initialActivities,
       taskFilter: 'all',
