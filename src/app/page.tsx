@@ -215,7 +215,7 @@ export default function Home() {
                 </div>
 
                 {/* Stats rapides */}
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="bg-muted/40 rounded-lg p-3 space-y-1">
                     <p className="text-sm text-muted-foreground">En retard</p>
                     <p className="text-2xl font-semibold text-red-500">2</p>
@@ -280,7 +280,7 @@ export default function Home() {
                 </div>
 
                 {/* Stats rapides */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="bg-muted/40 rounded-lg p-3 space-y-1">
                     <p className="text-sm text-muted-foreground">Aujourd&apos;hui</p>
                     <p className="text-2xl font-semibold">12</p>

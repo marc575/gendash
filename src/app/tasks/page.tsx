@@ -164,7 +164,7 @@ export default function TasksPage() {
       <Tabs defaultValue="tasks" className="w-full">
 
         <TabsContent value="tasks">
-          <div className="flex gap-4 mb-8 justify-between flex-wrap">
+          <div className="flex gap-2 mb-8 justify-between flex-wrap">
             <div className="flex gap-2 flex-wrap">
               <Button
                 key="all"
@@ -220,7 +220,7 @@ export default function TasksPage() {
                 </Badge>
               </Button>
             </div>
-            <div className="flex gap-4 items-center">
+            <div className="md:flex gap-4 items-center hidden">
               <div className="flex items-center gap-2 bg-gray-100 p-1 rounded-lg">
                 <IconButton
                   variant="ghost"
