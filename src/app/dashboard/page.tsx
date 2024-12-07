@@ -130,7 +130,7 @@ export default function DashboardPage() {
             Tableau de bord
           </h1>
           <p className="text-gray-500">
-            {format(new Date(), "EEEE d MMMM yyyy", { locale: fr })}
+            {format(new Date(), "d MMMM yyyy", { locale: fr })}
           </p>
         </div>
         <div className="flex gap-4">

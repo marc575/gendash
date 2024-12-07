@@ -148,7 +148,7 @@ export default function TasksPage() {
             Taches
           </h1>
           <p className="text-gray-500">
-            {format(new Date(), "EEEE d MMMM yyyy", { locale: fr })}
+            {format(new Date(), "d MMMM yyyy", { locale: fr })}
           </p>
         </div>
           <Button

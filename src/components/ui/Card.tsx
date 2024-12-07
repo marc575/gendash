@@ -80,7 +80,7 @@ const CardContent = React.forwardRef<HTMLDivElement, CardContentProps>(
   ({ className, children, ...props }, ref) => (
     <div 
       ref={ref} 
-      className={cn("p-2 pt-0 overflow-x-auto", className)} 
+      className={cn("p-4 pt-0 overflow-x-auto", className)} 
       {...props}
     >
       {children}
