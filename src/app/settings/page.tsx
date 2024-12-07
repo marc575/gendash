@@ -17,13 +17,11 @@ import {
   Grid,
   List,
   Calendar as CalendarIcon,
-  Mail,
   Save,
   RotateCcw,
   Check
 } from 'lucide-react';
 import { useSettingsStore } from '@/store/settingsStore';
-import { cn } from '@/lib/utils';
 
 interface SettingsSectionProps {
   icon: React.ElementType;
@@ -62,7 +60,7 @@ const ViewOption: React.FC<{
   value: string;
   selected: boolean;
   onClick: () => void;
-}> = ({ icon: Icon, label, value, selected, onClick }) => (
+}> = ({ icon: Icon, label, selected, onClick }) => (
   <Button
     variant={selected ? 'ghost-active' : 'ghost'}
     onClick={onClick}
@@ -109,12 +107,12 @@ export default function Settings() {
         <SettingsSection
           icon={Palette}
           title="Apparence"
-          description="Personnalisez l'apparence de l'application"
+          description="Personnalisez l&apos;apparence de l&apos;application"
         >
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium">Mode sombre</p>
-              <p className="text-sm text-gray-500">Activer le mode sombre pour l'interface</p>
+              <p className="text-sm text-gray-500">Activer le mode sombre pour l&apos;interface</p>
             </div>
             <div className="flex items-center gap-2">
               <Sun className="w-4 h-4 text-gray-500" />
@@ -220,7 +218,7 @@ export default function Settings() {
         <SettingsSection
           icon={Globe}
           title="Langue"
-          description="Choisissez la langue de l'interface"
+          description="Choisissez la langue de l&apos;interface"
         >
           <div className="grid grid-cols-2 gap-4">
             <Button
@@ -242,7 +240,7 @@ export default function Settings() {
           </div>
         </SettingsSection>
 
-        {/* Boutons d'action */}
+        {/* Boutons d&apos;action */}
         <div className="flex justify-end gap-4 pt-4">
           <Button 
             variant="ghost"

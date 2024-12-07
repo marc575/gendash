@@ -4,7 +4,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { Task } from '@/types/Task';
 import { Button } from '@/components/ui/Button';
 import { Avatar, AvatarImage, AvatarFallback, AvatarGroup } from '@/components/ui/Avatar';
-import { Check, Pencil, Trash2, GripVertical, Clock } from 'lucide-react';
+import { Check, Pencil, Trash2, GripVertical} from 'lucide-react';
 import { formatDate } from '@/lib/dateUtils';
 import { cn } from '@/lib/utils';
 

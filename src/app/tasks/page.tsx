@@ -22,7 +22,7 @@ import { CreateTaskModal } from '@/components/task/CreateTaskModal';
 import { Button } from '@/components/ui/Button';
 import { IconButton } from '@/components/ui/IconButton';
 import { Task } from '@/types/Task';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
+import { Tabs, TabsContent } from '@/components/ui/Tabs';
 import { SortableTask } from '@/components/task/SortableTask';
 import { Badge } from '@/components/ui/Badge';
 import { SearchInput } from '@/components/ui/SearchInput';
@@ -49,7 +49,6 @@ export default function TasksPage() {
   const [activeFilter, setActiveFilter] = useState<'all' | 'open' | 'closed' | 'archived'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
 

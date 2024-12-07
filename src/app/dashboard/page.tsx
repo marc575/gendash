@@ -6,7 +6,6 @@ import {
   Clock, 
   AlertTriangle,
   Calendar,
-  BarChart3,
   ArrowUp,
   ArrowDown,
   Tag,

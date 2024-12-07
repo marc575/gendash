@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
-import { Clock, Filter, List, Calendar } from 'lucide-react';
+import { Clock, List, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Activity {

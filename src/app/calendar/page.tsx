@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useTaskStore } from '@/store/taskStore';
 import { Task } from '@/types/Task';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isToday, isSameMonth, isSameDay, startOfWeek, endOfWeek, subWeeks, addWeeks, subMonths, addMonths } from 'date-fns';
@@ -42,10 +42,11 @@ const Calendar = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  useEffect(() => {
-    if (!currentDate) return;
+  // Mémoiser la logique de réduction des tâches
+  const tasksByDay = useMemo(() => {
+    if (!Array.isArray(tasks)) return {};
     
-    const tasksByDay = Array.isArray(tasks) ? tasks.reduce((acc: { [key: string]: Task[] }, task) => {
+    return tasks.reduce((acc: { [key: string]: Task[] }, task) => {
       if (!task.startTime) return acc;
       const dateKey = format(new Date(task.startTime), 'yyyy-MM-dd');
       if (!acc[dateKey]) {
@@ -53,9 +54,13 @@ const Calendar = () => {
       }
       acc[dateKey].push(task);
       return acc;
-    }, {} as { [key: string]: Task[] }) : {};
+    }, {} as { [key: string]: Task[] });
+  }, [tasks]);
+
+  useEffect(() => {
+    if (!currentDate) return;
     setMonthTasks(tasksByDay);
-  }, [tasks, currentDate]);
+  }, [currentDate, tasksByDay]);
 
   // Ne pas rendre le calendrier tant que currentDate n'est pas initialisé
   if (!currentDate) {

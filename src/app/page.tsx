@@ -20,7 +20,6 @@ import {
   MessageSquare, 
   LayoutGrid, 
   List,
-  Star,
   Rocket,
   Target,
   TrendingUp
@@ -222,7 +221,7 @@ export default function Home() {
                     <p className="text-2xl font-semibold text-red-500">2</p>
                   </div>
                   <div className="bg-muted/40 rounded-lg p-3 space-y-1">
-                    <p className="text-sm text-muted-foreground">Pour aujourd'hui</p>
+                    <p className="text-sm text-muted-foreground">Pour aujourd&apos;hui</p>
                     <p className="text-2xl font-semibold text-primary">8</p>
                   </div>
                   <div className="bg-muted/40 rounded-lg p-3 space-y-1">
@@ -283,7 +282,7 @@ export default function Home() {
                 {/* Stats rapides */}
                 <div className="grid grid-cols-3 gap-4">
                   <div className="bg-muted/40 rounded-lg p-3 space-y-1">
-                    <p className="text-sm text-muted-foreground">Aujourd'hui</p>
+                    <p className="text-sm text-muted-foreground">Aujourd&apos;hui</p>
                     <p className="text-2xl font-semibold">12</p>
                   </div>
                   <div className="bg-muted/40 rounded-lg p-3 space-y-1">
