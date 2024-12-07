@@ -166,23 +166,7 @@ export default function Projects() {
 
       {/* Filtres */}
       <div className="flex items-center justify-between">
-        <div className="flex gap-4">
-          <Button
-            variant={viewMode === 'grid' ? 'ghost-active' : 'ghost'}
-            onClick={() => setViewMode('grid')}
-            className="flex items-center gap-2"
-          >
-            <Grid className="w-4 h-4" />
-            Grille
-          </Button>
-          <Button
-            variant={viewMode === 'list' ? 'ghost-active' : 'ghost'}
-            onClick={() => setViewMode('list')}
-            className="flex items-center gap-2"
-          >
-            <List className="w-4 h-4" />
-            Liste
-          </Button>
+        <div className="flex gap-2 flex-wrap">
           <Button
             variant={filter === 'all' ? 'ghost-active' : 'ghost'}
             onClick={() => setFilter('all')}
@@ -210,6 +194,22 @@ export default function Projects() {
             <Badge variant="secondary">
               {mockProjects.filter(p => p.status === 'completed').length}
             </Badge>
+          </Button>
+          <Button
+            variant={viewMode === 'grid' ? 'ghost-active' : 'ghost'}
+            onClick={() => setViewMode('grid')}
+            className="flex items-center gap-2"
+          >
+            <Grid className="w-4 h-4" />
+            Grille
+          </Button>
+          <Button
+            variant={viewMode === 'list' ? 'ghost-active' : 'ghost'}
+            onClick={() => setViewMode('list')}
+            className="flex items-center gap-2"
+          >
+            <List className="w-4 h-4" />
+            Liste
           </Button>
         </div>
       </div>

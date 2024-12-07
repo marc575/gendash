@@ -32,7 +32,7 @@ export default function MessagesPage() {
   );
 
   return (
-    <div className="container py-6 flex gap-6 h-[calc(100vh-65px)] max-h-[calc(100vh-65px)]">
+    <div className="container py-6 flex w-100 gap-4 h-[calc(100vh-65px)] max-h-[calc(100vh-65px)]">
       {/* Liste des conversations */}
       <Card className="w-80 flex flex-col overflow-hidden">
         <div className="p-4 border-b">
@@ -80,7 +80,7 @@ export default function MessagesPage() {
       </Card>
 
       {/* Zone de conversation */}
-      <Card className="flex-1 flex flex-col overflow-hidden">
+      <Card className="flex-1 flex flex-col overflow-hidden hidden md:flex">
         {selectedConversation ? (
           <>
             <div className="p-4 border-b flex items-center gap-3">

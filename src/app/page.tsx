@@ -52,7 +52,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-b to-background/80 pb-8">
+    <main className="min-h-screen container bg-gradient-to-b to-background/80 pb-8">
       <div className="py-8">
         <motion.div 
           variants={container}
@@ -176,7 +176,7 @@ export default function Home() {
             {/* Section tâches */}
             <Card className="md:col-span-3 bg-card">
               <Card.Header className="pb-6 space-y-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center flex-wrap gap-4 justify-between">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-primary/10 rounded-lg">
                       <CheckCircle2 className="h-5 w-5 text-primary" />
@@ -215,7 +215,7 @@ export default function Home() {
                 </div>
 
                 {/* Stats rapides */}
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   <div className="bg-muted/40 rounded-lg p-3 space-y-1">
                     <p className="text-sm text-muted-foreground">En retard</p>
                     <p className="text-2xl font-semibold text-red-500">2</p>
@@ -241,7 +241,7 @@ export default function Home() {
             {/* Section activités */}
             <Card className="md:col-span-2 bg-card">
               <Card.Header className="pb-6 space-y-4">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center flex-wrap gap-4 justify-between">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-primary/10 rounded-lg">
                       <Activity className="h-5 w-5 text-primary" />
@@ -280,7 +280,7 @@ export default function Home() {
                 </div>
 
                 {/* Stats rapides */}
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   <div className="bg-muted/40 rounded-lg p-3 space-y-1">
                     <p className="text-sm text-muted-foreground">Aujourd&apos;hui</p>
                     <p className="text-2xl font-semibold">12</p>

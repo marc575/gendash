@@ -164,8 +164,8 @@ export default function TasksPage() {
       <Tabs defaultValue="tasks" className="w-full">
 
         <TabsContent value="tasks">
-          <div className="flex gap-4 mb-8 justify-between">
-            <div className="flex gap-4">
+          <div className="flex gap-4 mb-8 justify-between flex-wrap">
+            <div className="flex gap-2 flex-wrap">
               <Button
                 key="all"
                 variant={activeFilter === 'all' ? 'ghost-active' : 'ghost'}

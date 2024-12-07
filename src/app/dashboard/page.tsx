@@ -123,7 +123,7 @@ export default function DashboardPage() {
   return (
     <div className="container mx-auto p-6 space-y-6">
       {/* En-tête */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between flex-wrap gap-4 mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 mb-1 flex items-center gap-2">
             <Target className="h-6 w-6 text-blue-600" />

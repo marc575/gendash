@@ -64,7 +64,7 @@ export default function LastActivities() {
 
   return (
     <div className="container mx-auto py-6 space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center flex-wrap gap-4">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Clock className="w-6 h-6" />
           Recent Activities

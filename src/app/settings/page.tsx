@@ -82,9 +82,9 @@ export default function Settings() {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl space-y-6">
+    <div className="container py-4 sm:py-6 space-y-6">
       {/* En-tête */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 mb-1 flex items-center gap-2">
             <SettingsIcon className="h-6 w-6 text-blue-600" />
@@ -95,7 +95,7 @@ export default function Settings() {
           </p>
         </div>
         {saved && (
-          <Badge variant="secondary" className="bg-green-100 text-green-700 flex items-center gap-1">
+          <Badge variant="secondary" className="bg-green-100 text-green-700 flex items-center gap-1 self-start sm:self-center">
             <Check className="w-3 h-3" />
             Modifications enregistrées
           </Badge>
@@ -109,45 +109,47 @@ export default function Settings() {
           title="Apparence"
           description="Personnalisez l&apos;apparence de l&apos;application"
         >
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-medium">Mode sombre</p>
-              <p className="text-sm text-gray-500">Activer le mode sombre pour l&apos;interface</p>
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <p className="font-medium">Mode sombre</p>
+                <p className="text-sm text-gray-500">Activer le mode sombre pour l&apos;interface</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Sun className="w-4 h-4 text-gray-500" />
+                <Switch
+                  checked={settings.darkMode}
+                  onCheckedChange={settings.toggleDarkMode}
+                />
+                <Moon className="w-4 h-4 text-gray-500" />
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Sun className="w-4 h-4 text-gray-500" />
-              <Switch
-                checked={settings.darkMode}
-                onCheckedChange={settings.toggleDarkMode}
-              />
-              <Moon className="w-4 h-4 text-gray-500" />
-            </div>
-          </div>
 
-          <div>
-            <p className="font-medium mb-3">Vue par défaut</p>
-            <div className="flex gap-2">
-              <ViewOption
-                icon={List}
-                label="Liste"
-                value="list"
-                selected={settings.defaultView === 'list'}
-                onClick={() => settings.setDefaultView('list')}
-              />
-              <ViewOption
-                icon={Grid}
-                label="Grille"
-                value="grid"
-                selected={settings.defaultView === 'grid'}
-                onClick={() => settings.setDefaultView('grid')}
-              />
-              <ViewOption
-                icon={CalendarIcon}
-                label="Calendrier"
-                value="calendar"
-                selected={settings.defaultView === 'calendar'}
-                onClick={() => settings.setDefaultView('calendar')}
-              />
+            <div className="space-y-3">
+              <p className="font-medium">Vue par défaut</p>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                <ViewOption
+                  icon={List}
+                  label="Liste"
+                  value="list"
+                  selected={settings.defaultView === 'list'}
+                  onClick={() => settings.setDefaultView('list')}
+                />
+                <ViewOption
+                  icon={Grid}
+                  label="Grille"
+                  value="grid"
+                  selected={settings.defaultView === 'grid'}
+                  onClick={() => settings.setDefaultView('grid')}
+                />
+                <ViewOption
+                  icon={CalendarIcon}
+                  label="Calendrier"
+                  value="calendar"
+                  selected={settings.defaultView === 'calendar'}
+                  onClick={() => settings.setDefaultView('calendar')}
+                />
+              </div>
             </div>
           </div>
         </SettingsSection>
@@ -159,7 +161,7 @@ export default function Settings() {
           description="Gérez vos préférences de notification"
         >
           <div className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <p className="font-medium">Notifications du navigateur</p>
                 <p className="text-sm text-gray-500">Recevoir des notifications pour les tâches importantes</p>
@@ -169,7 +171,7 @@ export default function Settings() {
                 onCheckedChange={settings.toggleNotifications}
               />
             </div>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <p className="font-medium">Notifications par email</p>
                 <p className="text-sm text-gray-500">Recevoir des rappels par email</p>
@@ -188,7 +190,7 @@ export default function Settings() {
           title="Horaires de travail"
           description="Définissez vos heures de travail habituelles"
         >
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-1">Début de journée</label>
               <Input
@@ -198,6 +200,7 @@ export default function Settings() {
                   ...settings.workingHours,
                   start: e.target.value
                 })}
+                className="w-full"
               />
             </div>
             <div>
@@ -209,6 +212,7 @@ export default function Settings() {
                   ...settings.workingHours,
                   end: e.target.value
                 })}
+                className="w-full"
               />
             </div>
           </div>
@@ -220,43 +224,43 @@ export default function Settings() {
           title="Langue"
           description="Choisissez la langue de l&apos;interface"
         >
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Button
-              variant={settings.language === 'fr' ? 'ghost-active' : 'ghost'}
+              variant={settings.language === 'fr' ? 'default' : 'outline'}
               onClick={() => settings.setLanguage('fr')}
-              className="py-6"
+              className="w-full justify-start gap-2"
             >
-              <span className="text-lg mr-2">🇫🇷</span>
+              <span className="w-6 h-6 rounded-full overflow-hidden">🇫🇷</span>
               Français
             </Button>
             <Button
-              variant={settings.language === 'en' ? 'ghost-active' : 'ghost'}
+              variant={settings.language === 'en' ? 'default' : 'outline'}
               onClick={() => settings.setLanguage('en')}
-              className="py-6"
+              className="w-full justify-start gap-2"
             >
-              <span className="text-lg mr-2">🇬🇧</span>
+              <span className="w-6 h-6 rounded-full overflow-hidden">🇬🇧</span>
               English
             </Button>
           </div>
         </SettingsSection>
 
         {/* Boutons d&apos;action */}
-        <div className="flex justify-end gap-4 pt-4">
+        <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4 pt-4">
           <Button 
             variant="ghost"
-            onClick={settings.resetSettings}
-            className="flex items-center gap-2"
+            onClick={() => settings.resetSettings()}
+            className="w-full sm:w-auto order-2 sm:order-1"
           >
-            <RotateCcw className="w-4 h-4" />
+            <RotateCcw className="w-4 h-4 mr-2" />
             Réinitialiser
           </Button>
-          <Button
+          <Button 
             variant="primary"
             onClick={handleSave}
-            className="flex items-center gap-2"
+            className="w-full sm:w-auto order-1 sm:order-2"
           >
-            <Save className="w-4 h-4" />
-            Enregistrer les modifications
+            <Save className="w-4 h-4 mr-2" />
+            Enregistrer
           </Button>
         </div>
       </div>
