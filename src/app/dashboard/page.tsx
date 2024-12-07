@@ -13,10 +13,11 @@ import {
   Users
 } from 'lucide-react';
 import { useTaskStore } from '@/store/taskStore';
-import { format, isToday, isThisWeek } from 'date-fns';
+import { format, isToday, isThisWeek, isThisMonth } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
+import { Task } from '@/types/Task';
 
 const StatCard: React.FC<{
   icon: React.ElementType;
@@ -58,7 +59,7 @@ const TaskProgressCard: React.FC<{
   const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
   
   return (
-    <div className="bg-white py-6 rounded-xl shadow-sm">
+    <div className="bg-white p-6 rounded-xl shadow-sm">
       <h3 className="text-gray-500 text-sm font-medium mb-4">{title}</h3>
       <div className="flex items-center justify-between mb-2">
         <span className="text-2xl font-bold text-gray-900">{completed}/{total}</span>
@@ -76,36 +77,39 @@ const TaskProgressCard: React.FC<{
   );
 };
 
-export default function Dashboard() {
-  const { tasks } = useTaskStore();
+export default function DashboardPage() {
+  const tasks = useTaskStore(state => state.tasks) || [];
   
   // Statistiques générales
-  const totalTasks = tasks.length;
-  const completedTasks = tasks.filter(task => task.status === 'completed').length;
+  const totalTasks = Array.isArray(tasks) ? tasks.length : 0;
+  const completedTasks = Array.isArray(tasks) ? tasks.filter((task: Task) => task.status === 'completed').length : 0;
   
   // Tâches par période
-  const todayTasks = tasks.filter(task => 
-    task.startTime && isToday(new Date(task.startTime))
-  ).length;
+  const todayTasks = Array.isArray(tasks) ? tasks.filter((task: Task) => 
+    task.startTime && isToday(new Date(task.startTime)) && 
+    task.status !== 'completed' && task.status !== 'archived'
+  ).length : 0;
   
-  const weekTasks = tasks.filter(task => 
-    task.startTime && isThisWeek(new Date(task.startTime))
-  ).length;
+  const thisWeekTasks = Array.isArray(tasks) ? tasks.filter((task: Task) => 
+    task.startTime && isThisWeek(new Date(task.startTime)) && 
+    task.status !== 'completed' && task.status !== 'archived'
+  ).length : 0;
+  
+  const thisMonthTasks = Array.isArray(tasks) ? tasks.filter((task: Task) => 
+    task.startTime && isThisMonth(new Date(task.startTime)) && 
+    task.status !== 'completed' && task.status !== 'archived'
+  ).length : 0;
+  
+  // Tâches prioritaires
+  const highPriorityTasks = Array.isArray(tasks) ? tasks.filter((task: Task) => 
+    task.priority === 'High' && task.status !== 'completed' && task.status !== 'archived'
+  ).length : 0;
 
-  // Tâches par priorité
-  const highPriorityTasks = tasks.filter(task => task.priority === 'High').length;
-  const mediumPriorityTasks = tasks.filter(task => task.priority === 'Medium').length;
-  const lowPriorityTasks = tasks.filter(task => task.priority === 'Low').length;
-
-  // Tâches assignées
-  const assignedTasks = tasks.filter(task => task.assignee).length;
-
-  // Tâches complétées cette semaine
-  const completedWeekTasks = tasks.filter(task => 
-    task.startTime && 
-    isThisWeek(new Date(task.startTime)) && 
-    task.status === 'completed'
-  ).length;
+  // Tâches récentes
+  const recentTasks = Array.isArray(tasks) ? tasks
+    .filter((task: Task) => task.status !== 'archived')
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 5) : [];
 
   return (
     <div className="p-6 space-y-6">
@@ -169,13 +173,15 @@ export default function Dashboard() {
         <TaskProgressCard
           title="Tâches assignées"
           total={totalTasks}
-          completed={assignedTasks}
+          completed={Array.isArray(tasks) ? tasks.filter((task: Task) => task.assignee).length : 0}
           color="text-purple-600"
         />
         <TaskProgressCard
           title="Tâches de la semaine"
-          total={weekTasks}
-          completed={completedWeekTasks}
+          total={thisWeekTasks}
+          completed={Array.isArray(tasks) ? tasks.filter((task: Task) => 
+            task.startTime && isThisWeek(new Date(task.startTime)) && task.status === 'completed'
+          ).length : 0}
           color="text-green-600"
         />
       </div>
@@ -187,8 +193,8 @@ export default function Dashboard() {
           <div className="space-y-4">
             {[
               { label: 'Haute', value: highPriorityTasks, color: 'bg-red-600' },
-              { label: 'Moyenne', value: mediumPriorityTasks, color: 'bg-yellow-500' },
-              { label: 'Basse', value: lowPriorityTasks, color: 'bg-green-500' }
+              { label: 'Moyenne', value: Array.isArray(tasks) ? tasks.filter((task: Task) => task.priority === 'Medium').length : 0, color: 'bg-yellow-500' },
+              { label: 'Basse', value: Array.isArray(tasks) ? tasks.filter((task: Task) => task.priority === 'Low').length : 0, color: 'bg-green-500' }
             ].map(priority => (
               <div key={priority.label}>
                 <div className="flex items-center justify-between mb-2">
@@ -219,7 +225,7 @@ export default function Dashboard() {
             </Button>
           </div>
           <div className="space-y-4">
-            {tasks.slice(0, 5).map(task => (
+            {recentTasks.map(task => (
               <motion.div
                 key={task.id}
                 initial={{ opacity: 0, x: -20 }}

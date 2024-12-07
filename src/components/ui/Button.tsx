@@ -3,7 +3,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'destructive' | 'outline';
+type ButtonVariant = 'default' | 'primary' | 'secondary' | 'ghost' | 'destructive' | 'outline';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -16,7 +16,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export const Button: React.FC<ButtonProps> = ({
-  variant = 'primary', 
+  variant = 'default', 
   size = 'md',
   icon,
   iconPosition = 'left',
@@ -29,6 +29,7 @@ export const Button: React.FC<ButtonProps> = ({
     'focus:outline-none focus:ring-2 focus:ring-blue-100 focus:ring-offset-2',
     
     // Variants
+    variant === 'default' && 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm',
     variant === 'primary' && 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm',
     variant === 'secondary' && 'bg-blue-100 text-blue-700 hover:bg-blue-200',
     variant === 'ghost' && 'bg-transparent text-blue-600 hover:bg-blue-50',

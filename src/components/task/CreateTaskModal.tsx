@@ -1,239 +1,337 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/Dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/Dialog";
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { Label } from '@/components/ui/Label';
+import { Textarea } from '@/components/ui/Textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/Select';
+import { MultiSelect, Option } from '@/components/ui/MultiSelect';
 import { useTaskStore } from '@/store/taskStore';
-import { Task, TaskPriority, TaskStatus } from '@/types/Task';
-import { v4 as uuidv4 } from 'uuid';
-import { X, Save } from 'lucide-react';
+import { Task, TaskStatus, TaskPriority, User } from '@/types/Task';
 
 interface CreateTaskModalProps {
   isOpen: boolean;
   onClose: () => void;
-  task?: Task;
+  task?: Task | null;
 }
 
 export function CreateTaskModal({ isOpen, onClose, task }: CreateTaskModalProps) {
   const { addTask, updateTask } = useTaskStore();
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [priority, setPriority] = useState('Medium');
-  const [status, setStatus] = useState('pending');
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
-  const [assignee, setAssignee] = useState('');
-  const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(null);
-  const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(null);
+
+  const [newTask, setNewTask] = useState<Task>({
+    id: task?.id || '',
+    title: task?.title || '',
+    description: task?.description || '',
+    project: task?.project || '',
+    status: task?.status || 'open',
+    priority: task?.priority || 'Medium',
+    labels: task?.labels || [],
+    isCompleted: task?.isCompleted || false,
+    startTime: task?.startTime || null,
+    endTime: task?.endTime || null,
+    createdAt: task?.createdAt || new Date().toISOString(),
+    estimatedTime: task?.estimatedTime || 0,
+    actualTime: task?.actualTime || 0,
+    participants: task?.participants || [],
+    assignee: task?.assignee || null,
+    parentTask: task?.parentTask || undefined,
+    subtasks: task?.subtasks || [],
+    dependencies: task?.dependencies || [],
+    blockedBy: task?.blockedBy || [],
+    comments: task?.comments || [],
+    attachments: task?.attachments || [],
+    activity: task?.activity || [],
+    customFields: task?.customFields || {}
+  });
 
   useEffect(() => {
     if (task) {
-      setTitle(task.title);
-      setDescription(task.description || '');
-      setPriority(task.priority);
-      setStatus(task.status);
-      if (task.startTime) {
-        const startDate = new Date(task.startTime);
-        setStartTime(startDate.toISOString().split('T')[0]);
-        setSelectedStartDate(startDate);
-      } else {
-        setStartTime('');
-        setSelectedStartDate(null);
-      }
-      if (task.endTime) {
-        const endDate = new Date(task.endTime);
-        setEndTime(endDate.toISOString().split('T')[0]);
-        setSelectedEndDate(endDate);
-      } else {
-        setEndTime('');
-        setSelectedEndDate(null);
-      }
-      setAssignee(task.assignee?.name || '');
+      setNewTask({
+        ...task,
+        participants: task.participants || []
+      });
     } else {
-      resetForm();
+      setNewTask({
+        id: '',
+        title: '',
+        description: '',
+        project: '',
+        status: 'open',
+        priority: 'Medium',
+        labels: [],
+        isCompleted: false,
+        startTime: null,
+        endTime: null,
+        createdAt: new Date().toISOString(),
+        estimatedTime: 0,
+        actualTime: 0,
+        participants: [],
+        assignee: null,
+        parentTask: undefined,
+        subtasks: [],
+        dependencies: [],
+        blockedBy: [],
+        comments: [],
+        attachments: [],
+        activity: [],
+        customFields: {}
+      });
     }
   }, [task]);
 
-  const resetForm = () => {
-    setTitle('');
-    setDescription('');
-    setPriority('Medium');
-    setStatus('pending');
-    setStartTime('');
-    setEndTime('');
-    setAssignee('');
-    setSelectedStartDate(null);
-    setSelectedEndDate(null);
+  // Ajout des données de test pour les utilisateurs (à remplacer par des données réelles)
+  const availableUsers: Option[] = [
+    { value: "1", label: "John Doe" },
+    { value: "2", label: "Jane Smith" },
+    { value: "3", label: "Bob Johnson" },
+  ];
+
+  const selectedUsers = newTask.participants.map(user => ({
+    value: user.id,
+    label: user.name,
+  }));
+
+  const handleParticipantsChange = (selected: Option[]) => {
+    setNewTask({
+      ...newTask,
+      participants: selected.map(option => ({
+        id: option.value,
+        name: option.label,
+      })),
+    });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = () => {
+    if (!newTask.title.trim()) {
+      return;
+    }
     
-    const taskData: Partial<Task> = {
-      title,
-      description,
-      priority: priority as TaskPriority,
-      status: status as TaskStatus,
-      startTime: selectedStartDate ? selectedStartDate.toISOString() : null,
-      endTime: selectedEndDate ? selectedEndDate.toISOString() : null,
-      assignee: assignee ? { id: uuidv4(), name: assignee } : null,
-      project: 'default',
-      labels: [],
-      isCompleted: status === 'completed',
-      participants: [],
-      comments: [],
-      attachments: [],
-      activity: [],
-    };
-
     if (task) {
-      updateTask(task.id, taskData);
+      // En mode édition, on garde l'ID existant
+      updateTask(task.id, {
+        ...newTask,
+        id: task.id // On s'assure de garder l'ID original
+      });
     } else {
-      const newTask: Task = {
-        ...taskData as Task,
-        id: uuidv4(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+      // En mode création, on génère un nouvel ID
+      const taskWithId = {
+        ...newTask,
+        id: crypto.randomUUID()
       };
-      addTask(newTask);
+      addTask(taskWithId);
     }
 
-    resetForm();
     onClose();
-  };
-
-  const handleStartDateChange = (date: Date | null) => {
-    setSelectedStartDate(date);
-    setStartTime(date ? date.toISOString().split('T')[0] : '');
-  };
-
-  const handleEndDateChange = (date: Date | null) => {
-    setSelectedEndDate(date);
-    setEndTime(date ? date.toISOString().split('T')[0] : '');
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{task ? 'Modifier la tâche' : 'Nouvelle tâche'}</DialogTitle>
+          <DialogTitle>{task ? 'Modifier la tâche' : 'Créer une nouvelle tâche'}</DialogTitle>
+          <DialogDescription>
+            Remplissez les informations ci-dessous pour {task ? 'modifier' : 'créer'} une tâche.
+          </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Titre
-            </label>
-            <Input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Titre de la tâche"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Description
-            </label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Description de la tâche"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              rows={3}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Priorité
-              </label>
-              <select
-                value={priority}
-                onChange={(e) => setPriority(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="High">Haute</option>
-                <option value="Medium">Moyenne</option>
-                <option value="Low">Basse</option>
-              </select>
+        <div className="py-4">
+          <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="space-y-6">
+            {/* Informations de base */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="title">Titre *</Label>
+                <Input
+                  id="title"
+                  placeholder="Entrez le titre de la tâche"
+                  value={newTask.title}
+                  onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="project">Projet</Label>
+                <Input
+                  id="project"
+                  placeholder="Nom du projet"
+                  value={newTask.project}
+                  onChange={(e) => setNewTask({ ...newTask, project: e.target.value })}
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Statut
-              </label>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="pending">En attente</option>
-                <option value="in-progress">En cours</option>
-                <option value="completed">Terminé</option>
-                <option value="cancelled">Annulé</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Date de début
-              </label>
-              <Input
-                type="date"
-                value={startTime}
-                onChange={(e) => handleStartDateChange(e.target.valueAsDate)}
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                placeholder="Décrivez la tâche en détail..."
+                value={newTask.description}
+                rows={3}
+                onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Date de fin
-              </label>
+            {/* Statut et Priorité */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="status">Statut</Label>
+                <Select
+                  value={newTask.status}
+                  onValueChange={(value: TaskStatus) => setNewTask({ ...newTask, status: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionnez un statut" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="open">Ouvert</SelectItem>
+                    <SelectItem value="in-progress">En cours</SelectItem>
+                    <SelectItem value="pending">En attente</SelectItem>
+                    <SelectItem value="completed">Terminé</SelectItem>
+                    <SelectItem value="cancelled">Annulé</SelectItem>
+                    <SelectItem value="archived">Archivé</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="priority">Priorité</Label>
+                <Select
+                  value={newTask.priority}
+                  onValueChange={(value: TaskPriority) => setNewTask({ ...newTask, priority: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionnez une priorité" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="High">Haute</SelectItem>
+                    <SelectItem value="Medium">Moyenne</SelectItem>
+                    <SelectItem value="Low">Basse</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Dates et temps */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="startTime">Date de début</Label>
+                <Input
+                  id="startTime"
+                  type="datetime-local"
+                  value={newTask.startTime?.slice(0, 16) || ''}
+                  onChange={(e) => setNewTask({ ...newTask, startTime: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="endTime">Date de fin</Label>
+                <Input
+                  id="endTime"
+                  type="datetime-local"
+                  value={newTask.endTime?.slice(0, 16) || ''}
+                  onChange={(e) => setNewTask({ ...newTask, endTime: e.target.value })}
+                />
+              </div>
+            </div>
+
+            {/* Temps estimé et réel */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="estimatedTime">Temps estimé (minutes)</Label>
+                <Input
+                  id="estimatedTime"
+                  type="number"
+                  min="0"
+                  placeholder="Ex: 120"
+                  value={newTask.estimatedTime || ''}
+                  onChange={(e) => setNewTask({ ...newTask, estimatedTime: parseInt(e.target.value) || 0 })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="actualTime">Temps réel (minutes)</Label>
+                <Input
+                  id="actualTime"
+                  type="number"
+                  min="0"
+                  placeholder="Ex: 90"
+                  value={newTask.actualTime || ''}
+                  onChange={(e) => setNewTask({ ...newTask, actualTime: parseInt(e.target.value) || 0 })}
+                />
+              </div>
+            </div>
+
+            {/* Labels */}
+            <div className="space-y-2">
+              <Label htmlFor="labels">Labels</Label>
               <Input
-                type="date"
-                value={endTime}
-                onChange={(e) => handleEndDateChange(e.target.valueAsDate)}
+                id="labels"
+                placeholder="Ex: urgent, feature, bug (séparés par des virgules)"
+                value={newTask.labels.join(', ')}
+                onChange={(e) => setNewTask({
+                  ...newTask,
+                  labels: e.target.value.split(',').map(label => label.trim()).filter(Boolean)
+                })}
               />
             </div>
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Assigné à
-            </label>
-            <Input
-              value={assignee}
-              onChange={(e) => setAssignee(e.target.value)}
-              placeholder="Nom de la personne"
-            />
-          </div>
+            {/* Participants */}
+            <div className="grid gap-2">
+              <Label htmlFor="participants">Participants</Label>
+              <MultiSelect
+                options={availableUsers}
+                selected={selectedUsers}
+                onChange={handleParticipantsChange}
+                placeholder="Select participants..."
+              />
+            </div>
 
-          <div className="flex justify-end gap-3 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              className="flex items-center gap-2"
-            >
-              <X className="w-5 h-5" />
-              Annuler
-            </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              className="flex items-center gap-2"
-            >
-              <Save className="w-5 h-5" />
-              {task ? 'Modifier' : 'Créer'}
-            </Button>
-          </div>
-        </form>
+            {/* Tâche parente et dépendances */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="parentTask">Tâche parente (ID)</Label>
+                <Input
+                  id="parentTask"
+                  placeholder="ID de la tâche parente"
+                  value={newTask.parentTask || ''}
+                  onChange={(e) => setNewTask({ ...newTask, parentTask: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="dependencies">Dépendances (IDs séparés par des virgules)</Label>
+                <Input
+                  id="dependencies"
+                  placeholder="Ex: task-1, task-2"
+                  value={newTask.dependencies?.join(', ') || ''}
+                  onChange={(e) => setNewTask({
+                    ...newTask,
+                    dependencies: e.target.value.split(',').map(id => id.trim()).filter(Boolean)
+                  })}
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+              >
+                Annuler
+              </Button>
+              <Button
+                type="submit"
+                disabled={!newTask.title.trim()}
+              >
+                {task ? 'Modifier' : 'Créer'}
+              </Button>
+            </div>
+          </form>
+        </div>
       </DialogContent>
     </Dialog>
   );
-}
+};

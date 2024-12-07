@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTaskStore } from '@/store/taskStore';
 import { Task } from '@/types/Task';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isToday, isSameMonth, isSameDay, startOfWeek, endOfWeek, subWeeks, addWeeks, subMonths, addMonths } from 'date-fns';
@@ -18,8 +18,9 @@ const priorityColors = {
 };
 
 const Calendar = () => {
-  const { tasks, deleteTask } = useTaskStore();
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const tasks = useTaskStore(state => state.tasks) || [];
+  const deleteTask = useTaskStore(state => state.deleteTask);
+  const [currentDate, setCurrentDate] = useState<Date | null>(null);
   const [monthTasks, setMonthTasks] = useState<{ [key: string]: Task[] }>({});
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -28,16 +29,41 @@ const Calendar = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [isMobileView, setIsMobileView] = useState(false);
 
+  // Initialisation côté client uniquement
   useEffect(() => {
-    const checkMobileView = () => {
+    setCurrentDate(new Date());
+    setIsMobileView(window.innerWidth < 768);
+
+    const handleResize = () => {
       setIsMobileView(window.innerWidth < 768);
     };
-    
-    checkMobileView();
-    window.addEventListener('resize', checkMobileView);
-    
-    return () => window.removeEventListener('resize', checkMobileView);
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  useEffect(() => {
+    if (!currentDate) return;
+    
+    const tasksByDay = Array.isArray(tasks) ? tasks.reduce((acc: { [key: string]: Task[] }, task) => {
+      if (!task.startTime) return acc;
+      const dateKey = format(new Date(task.startTime), 'yyyy-MM-dd');
+      if (!acc[dateKey]) {
+        acc[dateKey] = [];
+      }
+      acc[dateKey].push(task);
+      return acc;
+    }, {} as { [key: string]: Task[] }) : {};
+    setMonthTasks(tasksByDay);
+  }, [tasks, currentDate]);
+
+  // Ne pas rendre le calendrier tant que currentDate n'est pas initialisé
+  if (!currentDate) {
+    return null;
+  }
+
+  const startOfCurrentWeek = startOfWeek(currentDate, { weekStartsOn: 1 });
+  const endOfCurrentWeek = endOfWeek(currentDate, { weekStartsOn: 1 });
 
   const previousPeriod = () => {
     if (isMobileView) {
@@ -54,22 +80,6 @@ const Calendar = () => {
       setCurrentDate(addMonths(currentDate, 1));
     }
   };
-
-  const startOfCurrentWeek = startOfWeek(currentDate, { weekStartsOn: 1 });
-  const endOfCurrentWeek = endOfWeek(currentDate, { weekStartsOn: 1 });
-
-  useEffect(() => {
-    const tasksByDay = tasks.reduce((acc: { [key: string]: Task[] }, task) => {
-      if (!task.startTime) return acc;
-      const dateKey = format(new Date(task.startTime), 'yyyy-MM-dd');
-      if (!acc[dateKey]) {
-        acc[dateKey] = [];
-      }
-      acc[dateKey].push(task);
-      return acc;
-    }, {});
-    setMonthTasks(tasksByDay);
-  }, [tasks, currentDate]);
 
   const handleDayClick = (day: Date, event: React.MouseEvent) => {
     event.stopPropagation();

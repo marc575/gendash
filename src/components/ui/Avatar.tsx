@@ -47,4 +47,38 @@ const AvatarFallback = React.forwardRef<
 ))
 AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName
 
-export { Avatar, AvatarImage, AvatarFallback }
+interface AvatarGroupProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode
+  max?: number
+}
+
+const AvatarGroup = React.forwardRef<HTMLDivElement, AvatarGroupProps>(
+  ({ children, className, max, ...props }, ref) => {
+    const childrenArray = React.Children.toArray(children)
+    const maxAvatars = max || 4
+    const displayAvatars = childrenArray.slice(0, maxAvatars)
+    const remainingAvatars = childrenArray.length - maxAvatars
+
+    return (
+      <div
+        ref={ref}
+        className={cn("flex -space-x-4", className)}
+        {...props}
+      >
+        {displayAvatars.map((child, i) => (
+          <div key={i} className="relative">
+            {child}
+          </div>
+        ))}
+        {remainingAvatars > 0 && (
+          <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-sm">
+            +{remainingAvatars}
+          </div>
+        )}
+      </div>
+    )
+  }
+)
+AvatarGroup.displayName = "AvatarGroup"
+
+export { Avatar, AvatarImage, AvatarFallback, AvatarGroup }

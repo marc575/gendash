@@ -9,7 +9,7 @@ import { Clock, Calendar, Trash2, GripVertical, CheckCircle2, Pencil, } from 'lu
 import { motion } from 'framer-motion';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { formatDate, formatTime } from '@/lib/utils';
+import { formatDate } from '@/lib/dateUtils';
 
 interface TaskCardProps {
   task: Task;
@@ -120,9 +120,13 @@ export function TaskCard({ task, onEdit, onDelete, onToggleComplete }: TaskCardP
           <div className="flex items-center justify-between pt-2">
             <div className="flex items-center space-x-2 text-sm text-muted-foreground">
               <Clock className="w-4 h-4" />
-              <span>{formatTime(task.startTime)}</span>
-              <Calendar className="w-4 h-4 ml-2" />
-              <span>{formatDate(task.endTime)}</span>
+              <span>{formatDate(task.startTime)}</span>
+              {task.endTime && (
+                <>
+                  <span>-</span>
+                  <span>{formatDate(task.endTime)}</span>
+                </>
+              )}
             </div>
 
             <div className="flex -space-x-2">
