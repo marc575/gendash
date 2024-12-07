@@ -172,9 +172,9 @@ export default function Home() {
           </motion.div>
 
           {/* Section tâches et activités */}
-          <motion.div variants={item} className="grid md:grid-cols-5 grid-cols-1 gap-6">
+          <motion.div variants={item} className="grid md:grid-cols-5 grid-cols-1 gap-4">
             {/* Section tâches */}
-            <Card className="md:col-span-3 bg-card">
+            <Card className="md:col-span-3">
               <Card.Header className="pb-6 space-y-4">
                 <div className="flex items-center flex-wrap gap-4 justify-between">
                   <div className="flex items-center gap-3">
@@ -239,7 +239,7 @@ export default function Home() {
             </Card>
 
             {/* Section activités */}
-            <Card className="md:col-span-2 bg-card">
+            <Card className="md:col-span-2">
               <Card.Header className="pb-6 space-y-4">
                 <div className="flex items-center flex-wrap gap-4 justify-between">
                   <div className="flex items-center gap-3">
@@ -280,7 +280,7 @@ export default function Home() {
                 </div>
 
                 {/* Stats rapides */}
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                   <div className="bg-muted/40 rounded-lg p-3 space-y-1">
                     <p className="text-sm text-muted-foreground">Aujourd&apos;hui</p>
                     <p className="text-2xl font-semibold">12</p>
