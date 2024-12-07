@@ -3,7 +3,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 
-type ButtonVariant = 'default' | 'primary' | 'secondary' | 'ghost' | 'destructive' | 'outline';
+type ButtonVariant = 'default' | 'primary' | 'secondary' | 'ghost' | 'ghost-active' | 'destructive' | 'outline';
 type ButtonSize = 'sm' | 'md' | 'lg';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -29,10 +29,11 @@ export const Button: React.FC<ButtonProps> = ({
     'focus:outline-none focus:ring-2 focus:ring-blue-100 focus:ring-offset-2',
     
     // Variants
-    variant === 'default' && 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm',
-    variant === 'primary' && 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm',
+    variant === 'default' && 'bg-blue-600 text-white hover:bg-blue-700',
+    variant === 'primary' && 'bg-blue-50 text-blue-900 hover:bg-blue-100 hover:shadow-700',
     variant === 'secondary' && 'bg-blue-100 text-blue-700 hover:bg-blue-200',
-    variant === 'ghost' && 'bg-transparent text-blue-600 hover:bg-blue-50',
+    variant === 'ghost' && 'bg-transparent text-gray-600 hover:bg-gray-50',
+    variant === 'ghost-active' && 'bg-transparent text-blue-600 hover:bg-blue-50',
     variant === 'destructive' && 'bg-red-600 text-white hover:bg-red-700 shadow-sm',
     variant === 'outline' && 'border border-gray-300 bg-white hover:bg-gray-100',
     

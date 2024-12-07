@@ -10,13 +10,17 @@ import {
   ArrowUp,
   ArrowDown,
   Tag,
-  Users
+  Users,
+  ListTodo,
+  Target
 } from 'lucide-react';
 import { useTaskStore } from '@/store/taskStore';
 import { format, isToday, isThisWeek, isThisMonth } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
+import { Card } from '@/components/ui/Card';
 import { Task } from '@/types/Task';
 
 const StatCard: React.FC<{
@@ -29,11 +33,7 @@ const StatCard: React.FC<{
   };
   color: string;
 }> = ({ icon: Icon, title, value, trend, color }) => (
-  <motion.div 
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    className="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-all duration-300"
-  >
+  <Card className="p-6 hover:shadow-md transition-all duration-300">
     <div className={`p-3 rounded-full w-fit ${color} bg-opacity-10 mb-4`}>
       <Icon className={`h-6 w-6 ${color}`} />
     </div>
@@ -41,13 +41,16 @@ const StatCard: React.FC<{
     <div className="flex items-end justify-between">
       <span className="text-2xl font-bold text-gray-900">{value}</span>
       {trend && (
-        <div className={`flex items-center text-sm ${trend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
-          {trend.isPositive ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />}
-          <span className="ml-1">{trend.value}%</span>
-        </div>
+        <Badge 
+          variant={trend.isPositive ? "secondary" : "outline"}
+          className="flex items-center gap-1"
+        >
+          {trend.isPositive ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
+          {trend.value}%
+        </Badge>
       )}
     </div>
-  </motion.div>
+  </Card>
 );
 
 const TaskProgressCard: React.FC<{
@@ -59,21 +62,23 @@ const TaskProgressCard: React.FC<{
   const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
   
   return (
-    <div className="bg-white p-6 rounded-xl shadow-sm">
+    <Card className="p-6">
       <h3 className="text-gray-500 text-sm font-medium mb-4">{title}</h3>
       <div className="flex items-center justify-between mb-2">
         <span className="text-2xl font-bold text-gray-900">{completed}/{total}</span>
-        <span className={`text-sm font-medium ${color}`}>{percentage}%</span>
+        <Badge variant="secondary" className={color}>
+          {percentage}%
+        </Badge>
       </div>
       <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${percentage}%` }}
           transition={{ duration: 1, ease: "easeOut" }}
-          className={`h-full ${color.replace('text-', 'bg-')}`}
+          className={`h-full bg-blue-400`}
         />
       </div>
-    </div>
+    </Card>
   );
 };
 
@@ -83,6 +88,7 @@ export default function DashboardPage() {
   // Statistiques générales
   const totalTasks = Array.isArray(tasks) ? tasks.length : 0;
   const completedTasks = Array.isArray(tasks) ? tasks.filter((task: Task) => task.status === 'completed').length : 0;
+  const openTasks = totalTasks - completedTasks;
   
   // Tâches par période
   const todayTasks = Array.isArray(tasks) ? tasks.filter((task: Task) => 
@@ -111,25 +117,41 @@ export default function DashboardPage() {
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 5) : [];
 
+  // Calcul des tendances (exemple)
+  const completionTrend = { value: 12, isPositive: true };
+  const priorityTrend = { value: 5, isPositive: false };
+
   return (
-    <div className="p-6 space-y-6">
+    <div className="container mx-auto p-6 space-y-6">
       {/* En-tête */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-1">
+          <h1 className="text-2xl font-bold text-gray-900 mb-1 flex items-center gap-2">
+            <Target className="h-6 w-6 text-blue-600" />
             Tableau de bord
           </h1>
           <p className="text-gray-500">
             {format(new Date(), "EEEE d MMMM yyyy", { locale: fr })}
           </p>
         </div>
-        <Button
-          onClick={() => window.location.href = '/tasks'}
-          className="flex items-center gap-2"
-        >
-          <BarChart3 className="h-4 w-4" />
-          Rapports
-        </Button>
+        <div className="flex gap-4">
+          <Button
+            variant="ghost"
+            onClick={() => window.location.href = '/last-activities'}
+            className="flex items-center gap-2"
+          >
+            <Clock className="h-4 w-4" />
+            Activités
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => window.location.href = '/tasks'}
+            className="flex items-center gap-2"
+          >
+            <ListTodo className="h-4 w-4" />
+            Gérer les tâches
+          </Button>
+        </div>
       </div>
 
       {/* Statistiques principales */}
@@ -138,57 +160,59 @@ export default function DashboardPage() {
           icon={CheckCircle}
           title="Tâches complétées"
           value={completedTasks}
-          trend={{ value: 12, isPositive: true }}
-          color="text-green-600"
+          trend={completionTrend}
+          color="text-blue-600"
         />
         <StatCard
           icon={Clock}
           title="Tâches en cours"
-          value={totalTasks - completedTasks}
-          color="text-blue-600"
+          value={openTasks}
+          color="text-purple-600"
         />
         <StatCard
           icon={AlertTriangle}
-          title="Tâches à haute priorité"
+          title="Tâches prioritaires"
           value={highPriorityTasks}
-          trend={{ value: 5, isPositive: false }}
+          trend={priorityTrend}
           color="text-red-600"
         />
         <StatCard
           icon={Calendar}
           title="Tâches aujourd'hui"
           value={todayTasks}
-          color="text-purple-600"
-        />
-      </div>
-
-      {/* Progression des tâches */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-        <TaskProgressCard
-          title="Progression globale"
-          total={totalTasks}
-          completed={completedTasks}
-          color="text-blue-600"
-        />
-        <TaskProgressCard
-          title="Tâches assignées"
-          total={totalTasks}
-          completed={Array.isArray(tasks) ? tasks.filter((task: Task) => task.assignee).length : 0}
-          color="text-purple-600"
-        />
-        <TaskProgressCard
-          title="Tâches de la semaine"
-          total={thisWeekTasks}
-          completed={Array.isArray(tasks) ? tasks.filter((task: Task) => 
-            task.startTime && isThisWeek(new Date(task.startTime)) && task.status === 'completed'
-          ).length : 0}
           color="text-green-600"
         />
       </div>
 
-      {/* Distribution des priorités */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
-        <div className="bg-white p-6 rounded-xl shadow-sm">
+      {/* Progression des tâches */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <TaskProgressCard
+          title="Progression globale"
+          total={totalTasks}
+          completed={completedTasks}
+          color="text-white bg-blue-600"
+        />
+        <TaskProgressCard
+          title="Cette semaine"
+          total={thisWeekTasks}
+          completed={Array.isArray(tasks) ? tasks.filter((task: Task) => 
+            task.startTime && isThisWeek(new Date(task.startTime)) && task.status === 'completed'
+          ).length : 0}
+          color="text-white"
+        />
+        <TaskProgressCard
+          title="Ce mois"
+          total={thisMonthTasks}
+          completed={Array.isArray(tasks) ? tasks.filter((task: Task) => 
+            task.startTime && isThisMonth(new Date(task.startTime)) && task.status === 'completed'
+          ).length : 0}
+          color="text-white"
+        />
+      </div>
+
+      {/* Distribution et tâches récentes */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <Card className="p-6">
           <h3 className="text-gray-500 text-sm font-medium mb-4">Distribution des priorités</h3>
           <div className="space-y-4">
             {[
@@ -199,9 +223,9 @@ export default function DashboardPage() {
               <div key={priority.label}>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm text-gray-600">{priority.label}</span>
-                  <span className="text-sm font-medium text-gray-900">
+                  <Badge variant="secondary">
                     {((priority.value / totalTasks) * 100).toFixed(1)}%
-                  </span>
+                  </Badge>
                 </div>
                 <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
                   <motion.div
@@ -214,23 +238,27 @@ export default function DashboardPage() {
               </div>
             ))}
           </div>
-        </div>
+        </Card>
 
         {/* Tâches récentes */}
-        <div className="bg-white p-6 rounded-xl shadow-sm">
+        <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-gray-500 text-sm font-medium">Tâches récentes</h3>
-            <Button variant="ghost" size="sm" onClick={() => window.location.href = '/tasks'}>
+            <Button 
+              variant="ghost" 
+              onClick={() => window.location.href = '/tasks'}
+              className="text-sm"
+            >
               Voir tout
             </Button>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-3">
             {recentTasks.map(task => (
               <motion.div
                 key={task.id}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg transition-colors"
               >
                 <div className="flex items-center gap-3">
                   <div className={`
@@ -245,22 +273,22 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   {task.assignee && (
-                    <div className="flex items-center gap-1 text-gray-500">
-                      <Users className="h-4 w-4" />
+                    <Badge variant="outline" className="flex items-center gap-1">
+                      <Users className="h-3 w-3" />
                       <span className="text-xs">{task.assignee.name}</span>
-                    </div>
+                    </Badge>
                   )}
                   {task.labels && task.labels.length > 0 && (
-                    <div className="flex items-center gap-1 text-gray-500">
-                      <Tag className="h-4 w-4" />
+                    <Badge variant="outline" className="flex items-center gap-1">
+                      <Tag className="h-3 w-3" />
                       <span className="text-xs">{task.labels.length}</span>
-                    </div>
+                    </Badge>
                   )}
                 </div>
               </motion.div>
             ))}
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   );

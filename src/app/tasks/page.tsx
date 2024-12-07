@@ -155,6 +155,7 @@ export default function TasksPage() {
           <Button
             onClick={() => setIsCreateModalOpen(true)}
             className="flex items-center"
+            variant='primary'
           >
             <Plus className="w-4 h-4 mr-2" />
             New Task
@@ -162,35 +163,13 @@ export default function TasksPage() {
       </div>
 
       <Tabs defaultValue="tasks" className="w-full">
-        <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
-          <TabsList>
-            <TabsTrigger key="tasks" value="tasks" className="relative">
-              Tâches
-              <Badge variant="secondary" className="ml-2">
-                {tasksByStatus.open}
-              </Badge>
-            </TabsTrigger>
-            <TabsTrigger key="completed" value="completed" className="relative">
-              Terminées
-              <Badge variant="secondary" className="ml-2">
-                {tasksByStatus.closed}
-              </Badge>
-            </TabsTrigger>
-            <TabsTrigger key="archived" value="archived" className="relative">
-              Archivées
-              <Badge variant="secondary" className="ml-2">
-                {tasksByStatus.archived}
-              </Badge>
-            </TabsTrigger>
-          </TabsList>
-        </div>
 
         <TabsContent value="tasks">
           <div className="flex gap-4 mb-8 justify-between">
             <div className="flex gap-4">
               <Button
                 key="all"
-                variant={activeFilter === 'all' ? 'default' : 'outline'}
+                variant={activeFilter === 'all' ? 'ghost-active' : 'ghost'}
                 onClick={() => setActiveFilter('all')}
                 className="flex items-center gap-2"
               >
@@ -201,42 +180,42 @@ export default function TasksPage() {
               </Button>
               <Button
                 key="open"
-                variant={activeFilter === 'open' ? 'default' : 'outline'}
+                variant={activeFilter === 'open' ? 'ghost-active' : 'ghost'}
                 onClick={() => setActiveFilter('open')}
                 className="flex items-center gap-2"
               >
                 Open
                 <Badge 
                   variant={activeFilter === 'open' ? 'secondary' : 'outline'}
-                  className="bg-green-100 text-green-700 border-green-200"
+                  className="ml-1"
                 >
                   {tasksByStatus.open}
                 </Badge>
               </Button>
               <Button
                 key="closed"
-                variant={activeFilter === 'closed' ? 'default' : 'outline'}
+                variant={activeFilter === 'closed' ? 'ghost-active' : 'ghost'}
                 onClick={() => setActiveFilter('closed')}
                 className="flex items-center gap-2"
               >
                 Closed
                 <Badge 
                   variant={activeFilter === 'closed' ? 'secondary' : 'outline'}
-                  className="bg-blue-100 text-blue-700 border-blue-200"
+                  className="ml-1"
                 >
                   {tasksByStatus.closed}
                 </Badge>
               </Button>
               <Button
                 key="archived"
-                variant={activeFilter === 'archived' ? 'default' : 'outline'}
+                variant={activeFilter === 'archived' ? 'ghost-active' : 'ghost'}
                 onClick={() => setActiveFilter('archived')}
                 className="flex items-center gap-2"
               >
                 Archived
                 <Badge 
                   variant={activeFilter === 'archived' ? 'secondary' : 'outline'}
-                  className="bg-gray-100 text-gray-700 border-gray-200"
+                  className="ml-1"
                 >
                   {tasksByStatus.archived}
                 </Badge>

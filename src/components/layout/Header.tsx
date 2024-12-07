@@ -19,7 +19,7 @@ export function Header({ className }: HeaderProps) {
             className="flex items-center space-x-2 font-bold hover:opacity-90 transition-opacity"
           >
             <ListTodo className="h-5 w-5" />
-            <span>TaskMaster</span>
+            <h2>TaskMaster</h2>
           </Link>
         </div>
         <div className="flex items-center space-x-4">

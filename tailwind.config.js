@@ -17,6 +17,21 @@ module.exports = {
       },
     },
     extend: {
+      fontSize: {
+        xs: ['0.8rem', { lineHeight: '1rem' }],
+        sm: ['1rem', { lineHeight: '1.25rem' }],
+        base: ['1.1rem', { lineHeight: '1.5rem' }],
+        lg: ['1.2rem', { lineHeight: '1.75rem' }],
+        xl: ['1.4rem', { lineHeight: '1.75rem' }],
+        '2xl': ['1.6rem', { lineHeight: '2rem' }],
+        '3xl': ['1.8rem', { lineHeight: '2.25rem' }],
+        '4xl': ['2rem', { lineHeight: '2.5rem' }],
+        '5xl': ['2.2rem', { lineHeight: '1' }],
+        '6xl': ['2.4rem', { lineHeight: '1' }],
+        '7xl': ['2.6rem', { lineHeight: '1' }],
+        '8xl': ['2.8rem', { lineHeight: '1' }],
+        '9xl': ['3rem', { lineHeight: '1' }],
+      },
       fontFamily: {
         sans: ["var(--font-outfit)", ...fontFamily.sans],
       },

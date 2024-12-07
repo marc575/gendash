@@ -9,6 +9,8 @@ import {
   Calendar,
   Settings,
   FolderKanban,
+  MessageCircle,
+  ActivityIcon
 } from "lucide-react";
 
 interface NavItem {
@@ -24,9 +26,19 @@ const navItems: NavItem[] = [
     icon: LayoutDashboard,
   },
   {
+    title: "Messages",
+    href: "/messages",
+    icon: MessageCircle,
+  },
+  {
     title: "Tâches",
     href: "/tasks",
     icon: ListTodo,
+  },
+  {
+    title: "Lasts Activities",
+    href: "/last-activities",
+    icon: ActivityIcon,
   },
   {
     title: "Projets",
