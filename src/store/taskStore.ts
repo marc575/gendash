@@ -40,6 +40,34 @@ interface TaskStats {
   };
 }
 
+interface StorageData {
+  state: TaskState;
+  version: number;
+}
+
+interface TaskState {
+  tasks: Task[];
+  filter: TaskFilter;
+  sort: TaskSort;
+  stats: TaskStats;
+  addTask: (task: Task) => void;
+  updateTask: (taskId: string, updates: Partial<Task>) => void;
+  deleteTask: (taskId: string) => void;
+  setFilter: (filter: TaskFilter) => void;
+  setSort: (sort: TaskSort) => void;
+  addComment: (taskId: string, content: string, user: User) => void;
+  addAttachment: (taskId: string, attachment: Omit<NonNullable<Task['attachments']>[0], 'id'>) => void;
+  assignTask: (taskId: string, userId: string) => void;
+  updateTaskStatus: (taskId: string, status: TaskStatus) => void;
+  addSubtask: (parentId: string, subtask: Task) => void;
+  updateTaskPriority: (taskId: string, priority: TaskPriority) => void;
+  addTaskLabel: (taskId: string, label: string) => void;
+  removeTaskLabel: (taskId: string, label: string) => void;
+  archiveTask: (taskId: string) => void;
+  calculateStats: () => TaskStats;
+  reorderTasks: (newTasks: Task[]) => void;
+}
+
 const calculateStats = (tasks: Task[]): TaskStats => {
   const stats: TaskStats = {
     total: tasks.length,
@@ -108,29 +136,6 @@ const calculateStats = (tasks: Task[]): TaskStats => {
   return stats;
 };
 
-interface TaskState {
-  tasks: Task[];
-  filter: TaskFilter;
-  sort: TaskSort;
-  stats: TaskStats;
-  addTask: (task: Task) => void;
-  updateTask: (taskId: string, updates: Partial<Task>) => void;
-  deleteTask: (taskId: string) => void;
-  setFilter: (filter: TaskFilter) => void;
-  setSort: (sort: TaskSort) => void;
-  addComment: (taskId: string, content: string, user: User) => void;
-  addAttachment: (taskId: string, attachment: Omit<NonNullable<Task['attachments']>[0], 'id'>) => void;
-  assignTask: (taskId: string, userId: string) => void;
-  updateTaskStatus: (taskId: string, status: TaskStatus) => void;
-  addSubtask: (parentId: string, subtask: Task) => void;
-  updateTaskPriority: (taskId: string, priority: TaskPriority) => void;
-  addTaskLabel: (taskId: string, label: string) => void;
-  removeTaskLabel: (taskId: string, label: string) => void;
-  archiveTask: (taskId: string) => void;
-  calculateStats: () => TaskStats;
-  reorderTasks: (newTasks: Task[]) => void;
-}
-
 export const useTaskStore = create<TaskState>()(
   persist(
     (set, get) => ({
@@ -141,11 +146,11 @@ export const useTaskStore = create<TaskState>()(
         labels: [],
         assignee: [],
         project: [],
-        isCompleted: false,
+        isCompleted: false
       },
       sort: {
         field: 'createdAt',
-        direction: 'desc',
+        direction: 'desc'
       },
       stats: calculateStats(initialTasks),
 
@@ -339,19 +344,28 @@ export const useTaskStore = create<TaskState>()(
       name: 'task-store',
       version: 1,
       storage: {
-        getItem: (name: string) => {
+        getItem: (name: string): StorageData | null => {
           const str = localStorage.getItem(name);
           if (!str) return null;
           try {
-            return JSON.parse(str);
+            const data = JSON.parse(str);
+            if (
+              typeof data === 'object' && 
+              data !== null && 
+              'state' in data && 
+              'version' in data
+            ) {
+              return data as StorageData;
+            }
+            return null;
           } catch {
             return null;
           }
         },
-        setItem: (name: string, value: unknown) => {
+        setItem: (name: string, value: unknown): void => {
           localStorage.setItem(name, JSON.stringify(value));
         },
-        removeItem: (name: string) => {
+        removeItem: (name: string): void => {
           localStorage.removeItem(name);
         },
       },

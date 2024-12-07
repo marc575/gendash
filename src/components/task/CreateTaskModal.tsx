@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/Select';
 import { MultiSelect, Option } from '@/components/ui/MultiSelect';
 import { useTaskStore } from '@/store/taskStore';
-import { Task, TaskStatus, TaskPriority, User } from '@/types/Task';
+import { Task, TaskStatus, TaskPriority } from '@/types/Task';
 
 interface CreateTaskModalProps {
   isOpen: boolean;
