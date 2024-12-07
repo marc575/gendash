@@ -18,7 +18,7 @@ const priorityColors = {
 };
 
 const Calendar = () => {
-  const tasks = useTaskStore(state => state.tasks) || [];
+  const getTasks = useTaskStore(state => state.tasks);
   const deleteTask = useTaskStore(state => state.deleteTask);
   const [currentDate, setCurrentDate] = useState<Date | null>(null);
   const [monthTasks, setMonthTasks] = useState<{ [key: string]: Task[] }>({});
@@ -44,6 +44,7 @@ const Calendar = () => {
 
   // Mémoiser la logique de réduction des tâches
   const tasksByDay = useMemo(() => {
+    const tasks = getTasks() || [];
     if (!Array.isArray(tasks)) return {};
     
     return tasks.reduce((acc: { [key: string]: Task[] }, task) => {
@@ -55,7 +56,7 @@ const Calendar = () => {
       acc[dateKey].push(task);
       return acc;
     }, {} as { [key: string]: Task[] });
-  }, [tasks]);
+  }, [getTasks]);
 
   useEffect(() => {
     if (!currentDate) return;

@@ -10,7 +10,9 @@ import {
   Users, 
   Calendar,
   MoreVertical,
-  CheckCircle2
+  CheckCircle2,
+  Grid,
+  List
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -166,6 +168,22 @@ export default function Projects() {
       <div className="flex items-center justify-between">
         <div className="flex gap-4">
           <Button
+            variant={viewMode === 'grid' ? 'ghost-active' : 'ghost'}
+            onClick={() => setViewMode('grid')}
+            className="flex items-center gap-2"
+          >
+            <Grid className="w-4 h-4" />
+            Grille
+          </Button>
+          <Button
+            variant={viewMode === 'list' ? 'ghost-active' : 'ghost'}
+            onClick={() => setViewMode('list')}
+            className="flex items-center gap-2"
+          >
+            <List className="w-4 h-4" />
+            Liste
+          </Button>
+          <Button
             variant={filter === 'all' ? 'ghost-active' : 'ghost'}
             onClick={() => setFilter('all')}
             className="flex items-center gap-2"
@@ -199,7 +217,7 @@ export default function Projects() {
       {/* Liste des projets */}
       <div className={cn(
         "grid gap-4",
-        viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'
+        viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2' : 'flex flex-col'
       )}>
         {filteredProjects.map(project => (
           <ProjectCard key={project.id} project={project} />
